@@ -5,14 +5,14 @@
  *   This is a generic, configurable fields to make it easier to add charts
  *   to Tripal Content pages.
  *
- * Allowing edit? No.
+ * Allowing edit? No
  */
 class local__chart_widget extends TripalFieldWidget {
 
   // The default lable for this field.
-  public static $default_label = '';
+  public static $default_label = 'No Edits';
 
-  // The list of field types for which this widget is appropriate.
+  // The list of field types for which this formatter is appropriate.
   public static $field_types = array('local__chart');
 
   /**

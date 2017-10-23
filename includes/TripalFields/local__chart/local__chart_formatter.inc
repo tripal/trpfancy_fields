@@ -19,7 +19,9 @@ class local__chart_formatter extends TripalFieldFormatter {
   public static $field_types = array('local__chart');
 
   // The list of default settings for this formatter.
-  public static $default_settings = array();
+  public static $default_settings = array(
+    'chart_label' => 'Summary',
+  );
 
   /**
    * Provides the field's setting form.
@@ -54,6 +56,16 @@ class local__chart_formatter extends TripalFieldFormatter {
    *   A Drupal Form array containing the settings form for this field.
    */
   public function settingsForm($view_mode, $form, &$form_state) {
+
+    $element = array();
+    // @todo figure out how to make this work. Currently I get AJAX puke...
+    $element['chart_label'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Label',
+    );
+
+    return $element;
+
   }
 
   /**
@@ -85,6 +97,27 @@ class local__chart_formatter extends TripalFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
+    if (!empty($items[0]['value'])) {
+      $rows = array();
+      foreach ($items[0]['value'] as $type => $count) {
+        $rows[] = array($type, number_format($count));
+      }
+      ddl($items, 'items');
+
+      $element[0] = array(
+        '#type' => 'markup',
+        '#theme' => 'table',
+        '#header' => array('Category', 'Count'),
+        '#rows' => $rows,
+      );
+    }
+    else {
+      $element[0] = array(
+        '#type' => 'markup',
+        '#markup' => 'No Data.'
+      );
+    }
+
   }
 
   /**
@@ -115,6 +148,7 @@ class local__chart_formatter extends TripalFieldFormatter {
    *
    */
   public function settingsSummary($view_mode) {
+    return 'Pie Chart';
   }
 
 }

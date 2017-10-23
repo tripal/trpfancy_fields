@@ -58,7 +58,7 @@ function trpfancy_fields_bundle_fields_info($entity_type, $bundle) {
       'cardinality' => 1,
       'locked' => FALSE,
       'storage' => array(
-        'type' => 'field_chado_storage',
+        'type' => 'tripal_no_storage',
       ),
     );
   }

@@ -45,13 +45,13 @@ class local__chart extends TripalField {
   // changed.
   public static $default_settings = array(
     'storage' => 'tripal_no_storage',
-    // It is expected that all fields set a 'value' in the load() function.
-    // In many cases, the value may be an associative array of key/value pairs.
-    // In order for Tripal to provide context for all data, the keys should
-    // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
-    // function that are supported by the query() function should be
-    // listed here.
-    'searchable_keys' => array(),
+     // It is expected that all fields set a 'value' in the load() function.
+     // In many cases, the value may be an associative array of key/value pairs.
+     // In order for Tripal to provide context for all data, the keys should
+     // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
+     // function that are supported by the query() function should be
+     // listed here.
+     'searchable_keys' => array(),
   );
 
   // Provide a list of instance specific settings. These can be access within
@@ -89,8 +89,7 @@ class local__chart extends TripalField {
   // should exclude the field from web serivces or downloads.  An example
   // could be a quick search field that appears on the page that redirects
   // the user but otherwise provides no data.
-  public static $no_data = TRUE;
-
+  public static $no_data = FALSE;
 
  /**
    * Loads the field values from the underlying data store.
@@ -120,6 +119,25 @@ class local__chart extends TripalField {
    *
    */
   public function load($entity) {
-  }
 
+    ddl('executed load');
+
+    $table_name = 'organism_feature_count';
+    $label_column = 'feature_type';
+    $count_column = 'num_features';
+    $filter_column = 'organism_id';
+    $filter_value = 1;
+
+    // ChadoFields automatically load the chado column specified in the
+    // default settings above. If that is all you need then you don't even
+    // need to implement this function. However, if you need to add any
+    // additional data to be used in the display, you should add it here.
+    parent::load($entity);
+
+    // Fake test data.
+    $entity->local__chart['und'][0]['value'] = array();
+    $entity->local__chart['und'][0]['value']['chromosome'] = 8;
+    $entity->local__chart['und'][0]['value']['gene'] = 8888888;
+
+  }
 }
