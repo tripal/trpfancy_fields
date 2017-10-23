@@ -2,3 +2,6 @@
 /**
  * @file
  */
+
+// Includes all non-class field functions.
+include('includes/trpfancy_fields.fields.inc');
