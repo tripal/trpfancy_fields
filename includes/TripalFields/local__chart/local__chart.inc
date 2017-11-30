@@ -122,22 +122,35 @@ class local__chart extends TripalField {
 
     ddl('executed load');
 
+    // This should be configurable at some point... ;-p
     $table_name = 'organism_feature_count';
     $label_column = 'feature_type';
     $count_column = 'num_features';
-    $filter_column = 'organism_id';
-    $filter_value = 1;
+    $filter_column = 'species';
+    $filter_field = 'taxrank__species';
+    $use_record_id = FALSE;
 
-    // ChadoFields automatically load the chado column specified in the
-    // default settings above. If that is all you need then you don't even
-    // need to implement this function. However, if you need to add any
-    // additional data to be used in the display, you should add it here.
-    parent::load($entity);
+    // Grab the primary key of the chado record.
+    if ($use_record_id) {
+      $filter_value = $entity->chado_record_id;
+    }
+    // Or grab the value of a configured Dripal/Tripal/Chado field.
+    else {
+      $filter_value = $entity->{$filter_field}['und'][0]['value'];
+    }
+    ddl($filter_value, 'filter value');
+    //dpm($entity, 'entity');
 
-    // Fake test data.
+    // Then grab the information we need from the materialized view
+    // and add it as the value.
+    $query = "SELECT $label_column, $count_column
+              FROM {".$table_name."}
+              WHERE $filter_column=:filter_value
+              ORDER BY $count_column DESC";
+    $results = chado_query($query, array(':filter_value' => $filter_value));
     $entity->local__chart['und'][0]['value'] = array();
-    $entity->local__chart['und'][0]['value']['chromosome'] = 8;
-    $entity->local__chart['und'][0]['value']['gene'] = 8888888;
-
+    foreach ($results as $r) {
+      $entity->local__chart['und'][0]['value'][ $r->{$label_column} ] = $r->{$count_column};
+    }
   }
 }
