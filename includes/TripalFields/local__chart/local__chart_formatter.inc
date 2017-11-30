@@ -20,7 +20,9 @@ class local__chart_formatter extends TripalFieldFormatter {
 
   // The list of default settings for this formatter.
   public static $default_settings = array(
-    'chart_label' => 'Summary',
+    'title' => 'Pie Chart.',
+    'legend' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed scelerisque facilisis fringilla. Donec id dui dapibus, tincidunt dui vitae, tincidunt lorem. Suspendisse lorem enim, bibendum id varius vel, fermentum non orci. ',
+
   );
 
   /**
@@ -56,16 +58,23 @@ class local__chart_formatter extends TripalFieldFormatter {
    *   A Drupal Form array containing the settings form for this field.
    */
   public function settingsForm($view_mode, $form, &$form_state) {
-
     $element = array();
-    // @todo figure out how to make this work. Currently I get AJAX puke...
-    $element['chart_label'] = array(
+
+    $element['title'] = array(
       '#type' => 'textfield',
-      '#title' => 'Label',
+      '#title' => 'Figure Title',
+      '#default_value' => self::$default_settings['title'],
+      '#description' => 'A breif title for the figure.',
+    );
+
+    $element['legend'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Figure Legend',
+      '#default_value' => self::$default_settings['legend'],
+      '#description' => 'Should describe the figure to the user.',
     );
 
     return $element;
-
   }
 
   /**
@@ -96,20 +105,60 @@ class local__chart_formatter extends TripalFieldFormatter {
 
     // Get the settings
     $settings = $display['settings'];
+    // Fill in defaults for any settings not set.
+    foreach (self::$default_settings as $key => $value) {
+      if (!isset($settings[$key])) {
+        $settings[$key] = $value;
+      }
+    }
 
     if (!empty($items[0]['value'])) {
-      $rows = array();
-      foreach ($items[0]['value'] as $type => $count) {
-        $rows[] = array($type, number_format($count));
-      }
-      ddl($items, 'items');
 
+      // Process items to expose to JS.
+      $data = array();
+      $js_settings = array();
+      foreach ($items as $key => $value) {
+        $data[$key] = array();
+        $data[$key]['parts'] = array();
+        foreach ($value['value']['hydra:member'] as $part) {
+          $data[$key]['parts'][] = array(
+            'label' => $part['rdfs:label'],
+            'count' => $part['local:count'],
+          );
+        }
+      }
+      ddl($data, 'JS data');
+
+      // Expose the data & settings to JS.
+      drupal_add_js(array('trpfancy_fields' => array('local__chart' => $data)), 'setting');
+      drupal_add_js(array('trpfancy_fields' => array('settings' => $js_settings)), 'setting');
+
+      // Add D3.js and our Pie chart javascript.
+      drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js');
+      //drupal_add_js(drupal_get_path('module','trpfancy_fields').'/theme/js/PieChart.js');
+
+      // Add CSS
+      drupal_add_css('
+        #local-chart-summary #pie-chart {
+          padding: 50px 20px 20px 20px;
+        }
+        #local-chart-summary .legend-title {
+          font-weight: bold;
+        }', 'inline');
+
+      // Finally, add the markup.
       $element[0] = array(
         '#type' => 'markup',
-        '#theme' => 'table',
-        '#header' => array('Category', 'Count'),
-        '#rows' => $rows,
+        '#markup' => '
+          <div id="local-chart-summary" class="figure">
+            <div id="pie-chart"></div>
+            <div class="legend">
+              <span class="legend-title">Figure: ' . $settings['title'] . '</span>
+              <span class="legend-description">' . $settings['legend'] . '</span>
+            </div>
+          </div>',
       );
+
     }
     else {
       $element[0] = array(

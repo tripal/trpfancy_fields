@@ -149,8 +149,12 @@ class local__chart extends TripalField {
               ORDER BY $count_column DESC";
     $results = chado_query($query, array(':filter_value' => $filter_value));
     $entity->local__chart['und'][0]['value'] = array();
+    $entity->local__chart['und'][0]['value']['hydra:member'] = array();
     foreach ($results as $r) {
-      $entity->local__chart['und'][0]['value'][ $r->{$label_column} ] = $r->{$count_column};
+      $entity->local__chart['und'][0]['value']['hydra:member'][] = array(
+        'rdfs:label' => $r->{$label_column},
+        'local:count' => $r->{$count_column},
+      );
     }
   }
 }
