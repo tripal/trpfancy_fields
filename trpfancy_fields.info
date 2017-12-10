@@ -3,3 +3,5 @@ description = Provides additional fields to jazz up your Tripal Content Pages
 core = 7.x
 package = Tripal Extensions
 dependencies[] = tripal
+
+files[] = includes/TripalFields/PieChartField.inc

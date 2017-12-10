@@ -135,6 +135,7 @@ class local__chart_formatter extends TripalFieldFormatter {
 
       // Add D3.js and our Pie chart javascript.
       drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js');
+      // @todo implement the chart ;-P
       //drupal_add_js(drupal_get_path('module','trpfancy_fields').'/theme/js/PieChart.js');
 
       // Add CSS
