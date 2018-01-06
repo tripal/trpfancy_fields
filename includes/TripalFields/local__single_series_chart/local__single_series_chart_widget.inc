@@ -7,13 +7,13 @@
  *
  * Allowing edit? No
  */
-class local__chart_widget extends TripalFieldWidget {
+class local__single_series_chart_widget extends TripalFieldWidget {
 
   // The default lable for this field.
   public static $default_label = 'No Edits';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__chart');
+  public static $field_types = array('local__single_series_chart');
 
   /**
    * Provides the form for editing of this field.

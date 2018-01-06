@@ -2,19 +2,18 @@
 /**
  * @class
  * Purpose: Provide a graphical summary of data stored in a materialized view.
- *   This is a generic, configurable field to make it easier to add charts
+ *   This is a generic, configurable fields to make it easier to add charts
  *   to Tripal Content pages.
- *
- * *** MUST BE EXTENDED ***
- * NULL Values in $default_instance_settings must be set in the child class.
  *
  * Data:
  *   Data is pulled from a configured materialized view and filtered based on a
  *   specific Tripal/Chado field.
  * Assumptions:
- *   - None currently identified.
+ *   - Currently there can only be one such chart per page. If you need more then
+ *     one chart, a current work around is to extend this class using a different
+ *     term.
  */
-class PieChartField extends TripalField {
+class local__single_series_chart extends ChadoChartField {
 
   // --------------------------------------------------------------------------
   //                     EDITABLE STATIC CONSTANTS
@@ -25,16 +24,16 @@ class PieChartField extends TripalField {
   // --------------------------------------------------------------------------
 
   // The default lable for this field.
-  public static $default_label = 'Tripal Chart';
+  public static $default_label = 'Chado Single-Series Chart';
 
   // The default description for this field.
-  public static $default_description = 'Provides a graphical summary of data.';
+  public static $default_description = 'A type of graph in which all the data is part of a single series. Specifically, the dataset consists of labels and corresponding values.';
 
   // The default widget for this field.
-  public static $default_widget = 'NoWidget';
+  public static $default_widget = 'local__single_series_chart_widget';
 
   // The default formatter for this field.
-  public static $default_formatter = 'PieChartFormatter';
+  public static $default_formatter = 'local__single_series_chart_formatter';
 
   // The module that manages this field.
   public static $module = 'trpfancy_fields';
@@ -64,25 +63,25 @@ class PieChartField extends TripalField {
   // required for all TripalFields.
   public static $default_instance_settings = array(
     // The short name for the vocabulary (e.g. shcema, SO, GO, PATO, etc.).
-    'term_vocabulary' => NULL,
+    'term_vocabulary' => 'local',
     // The name of the term.
-    'term_name' => NULL,
+    'term_name' => 'single series chart',
     // The unique ID (i.e. accession) of the term.
-    'term_accession' => NULL,
+    'term_accession' => 'single series chart',
     // Set to TRUE if the site admin is not allowed to change the term
     // type, otherwise the admin can change the term mapped to a field.
     'term_fixed' => FALSE,
     // Indicates if this field should be automatically attached to display
     // or web services or if this field should be loaded separately. This
     // is convenient for speed.  Fields that are slow should for loading
-    // should have auto_attach set to FALSE so tha their values can be
+    // should ahve auto_attach set to FALSE so tha their values can be
     // attached asyncronously.
     'auto_attach' => FALSE,
 
-    // The pie chart shown is able to be specific to the Drupal page by using a
+    // The chart shown is able to be specific to the Drupal page by using a
     // Drupal/Tripal/Chado field to filter the materialized view. For example,
     // if you are on the "Tripalus databasica" organism page, then you may want
-    // a pie chart showing the ratio/count of "Tripalus databasica" sequence
+    // a chart showing the ratio/count of "Tripalus databasica" sequence
     // features. This is done using a combination of the filter_field (Drupal)
     // and filter_column (Materialized View).
     //-----------------------------------------------------
@@ -90,7 +89,7 @@ class PieChartField extends TripalField {
     // value to filter the materialized view on. For example, if you want
     // `organism_feature_count.species = taxrank__species` then you set the
     // `filter_field = taxrank__species` and the `filter_column = species`.
-    'filter_field' => NULL,
+    'filter_field' => 'taxrank__species',
     // Use this setting if the value you would like to filter on is the primary
     // key of the chado record being displayed on the page. For example, if you
     // want `organism_feature_count.organism_id = chado_record->organism_id`
@@ -100,14 +99,14 @@ class PieChartField extends TripalField {
     // The following relate to the materialized view:
     //-----------------------------------------------------
     // The table name of the materialized view to pull data from.
-    'materialized_view' => NULL,
+    'materialized_view' => 'organism_feature_count',
     // The column whose value should be the category labels on the chart.
-    'label_column' => NULL,
-    // The column containing the numbers determining the pie piece size.
-    'count_column' => NULL,
+    'label_column' => 'feature_type',
+    // The column containing the numbers determining the category size.
+    'count_column' => 'num_features',
     // The column to filter the materialized view based on. This is usually
     // a foreign key but doesn't have to be.
-    'filter_column' => NULL,
+    'filter_column' => 'species',
   );
 
   // A boolean specifying that users should not be allowed to create
@@ -122,68 +121,4 @@ class PieChartField extends TripalField {
   // the user but otherwise provides no data.
   public static $no_data = FALSE;
 
- /**
-   * Loads the field values from the underlying data store.
-   *
-   * @param $entity
-   *
-   * @return
-   *   An array of the following format:
-   *     $entity->{$field_name}['und'][0]['value'] = $value;
-   *   where:
-   *     - $entity is the enity object to which this field is attached.
-   *     - $field_name is the name of this field
-   *     - 'und' is the language code (in this case 'und' == undefined)
-   *     - 0 is the cardinality.  Increment by 1 when more than one item is
-   *       available.
-   *     - 'value' is the key indicating the value of this field. It should
-   *       always be set.  The value of the 'value' key will be the contents
-   *       used for web services and for downloadable content.  The value
-   *       should be of the follow format types: 1) A single value (text,
-   *       numeric, etc.) 2) An array of key value pair. 3) If multiple entries
-   *       then cardinality should incremented and format types 1 and 2 should
-   *       be used for each item.
-   *   The array may contain as many other keys at the same level as 'value'
-   *   but those keys are for internal field use and are not considered the
-   *   value of the field.
-   *
-   *
-   */
-  public function load($entity) {
-
-    // @debug ddl('executed load');
-
-    // Retrieve the default settings for use when loading data.
-    $table_name = $this->instance['settings']['materialized_view'];
-    $label_column = $this->instance['settings']['label_column'];
-    $count_column = $this->instance['settings']['count_column'];
-    $filter_column = $this->instance['settings']['filter_column'];
-    $filter_field = $this->instance['settings']['filter_field'];
-    $use_record_id = $this->instance['settings']['use_record_id'];
-
-    // Grab the primary key of the chado record.
-    if ($use_record_id) {
-      $filter_value = $entity->chado_record_id;
-    }
-    // Or grab the value of a configured Dripal/Tripal/Chado field.
-    else {
-      $filter_value = $entity->{$filter_field}['und'][0]['value'];
-    }
-
-    // Then grab the information we need from the materialized view
-    // and add it as the value.
-    $query = "SELECT $label_column, $count_column
-              FROM {".$table_name."}
-              WHERE $filter_column=:filter_value
-              ORDER BY $count_column DESC";
-    $results = chado_query($query, array(':filter_value' => $filter_value));
-    $entity->local__chart['und'][0]['value'] = array();
-    $entity->local__chart['und'][0]['value']['hydra:member'] = array();
-    foreach ($results as $r) {
-      $entity->local__chart['und'][0]['value']['hydra:member'][] = array(
-        'rdfs:label' => $r->{$label_column},
-        'local:count' => $r->{$count_column},
-      );
-    }
-  }
 }

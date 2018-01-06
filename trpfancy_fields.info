@@ -5,4 +5,4 @@ package = Tripal Extensions
 dependencies[] = tripal
 dependencies[] = tripald3
 
-files[] = includes/TripalFields/PieChartField.inc
+files[] = includes/TripalFields/ChadoChartField.inc

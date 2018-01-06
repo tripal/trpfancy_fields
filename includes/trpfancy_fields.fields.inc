@@ -37,21 +37,21 @@ function trpfancy_fields_bundle_fields_info($entity_type, $bundle) {
   // Because we are expecting data housed in Chado we can use the 'data_table'
   // property of the bundle to determine if this bundle is really the one
   // we want the field to be associated with.
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  if (isset($bundle->data_table)) {
 
     // Chart Field.
     //---------------------------------
     // Graphically sumarizes data.
     tripal_insert_cvterm(array(
-      'id' => 'local:chart',
-      'name' => 'chart',
+      'id' => 'local:single series chart',
+      'name' => 'single series chart',
       'cv_name' => 'local',
-      'definition' => 'A graphical summary of data.',
+      'definition' => 'A type of graph in which all the data is part of a single series. Specifically, the dataset consists of labels and corresponding values.',
     ));
 
     // Then describe the field defined by that term.
-    $field_name = 'local__chart';
-    $field_type = 'local__chart';
+    $field_name = 'local__single_series_chart';
+    $field_type = 'local__single_series_chart';
     $fields[$field_name] = array(
       'field_name' => $field_name,
       'type' => $field_type,
@@ -91,6 +91,7 @@ function trpfancy_fields_bundle_fields_info($entity_type, $bundle) {
 function trpfancy_fields_bundle_instances_info($entity_type, $bundle) {
   $instances = array();
 
+
   // ORGANISM..
   //===============
   if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
@@ -98,26 +99,26 @@ function trpfancy_fields_bundle_instances_info($entity_type, $bundle) {
     // Chart Field.
     //---------------------------------
     // Graphically sumarizes data.
-    $field_name = 'local__chart';
-    $field_type = 'local__chart';
+    $field_name = 'local__single_series_chart';
+    $field_type = 'local__single_series_chart';
     $instances[$field_name] =  array(
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
-      'label' => 'Tripal Chart',
-      'description' => 'Graphically summarizes data.',
+      'label' => 'Chado Single-Series Chart',
+      'description' => 'A type of graph in which all the data is part of a single series. Specifically, the dataset consists of labels and corresponding values.',
       'required' => FALSE,
       'settings' => array(
         'auto_attach' => FALSE,
       ),
       'widget' => array(
-        'type' => 'local__chart_widget',
+        'type' => 'local__single_series_chart_widget',
         'settings' => array(),
       ),
       'display' => array(
         'default' => array(
           'label' => 'hidden',
-          'type' => 'local__chart_formatter',
+          'type' => 'local__single_series_chart_formatter',
           'settings' => array(),
         ),
       ),
