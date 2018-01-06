@@ -20,7 +20,7 @@ class local__chart_formatter extends TripalFieldFormatter {
 
   // The list of default settings for this formatter.
   public static $default_settings = array(
-    'title' => 'Pie Chart.',
+    'title' => 'Pie Chart',
     'legend' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed scelerisque facilisis fringilla. Donec id dui dapibus, tincidunt dui vitae, tincidunt lorem. Suspendisse lorem enim, bibendum id varius vel, fermentum non orci. ',
 
   );
@@ -103,6 +103,9 @@ class local__chart_formatter extends TripalFieldFormatter {
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
+    // Grab the name of the field to create a unique ID for the chart.
+    $field_name = $this->instance['field_name'];
+
     // Get the settings
     $settings = $display['settings'];
     // Fill in defaults for any settings not set.
@@ -116,12 +119,9 @@ class local__chart_formatter extends TripalFieldFormatter {
 
       // Process items to expose to JS.
       $data = array();
-      $js_settings = array();
       foreach ($items as $key => $value) {
-        $data[$key] = array();
-        $data[$key]['parts'] = array();
         foreach ($value['value']['hydra:member'] as $part) {
-          $data[$key]['parts'][] = array(
+          $data[] = array(
             'label' => $part['rdfs:label'],
             'count' => $part['local:count'],
           );
@@ -130,33 +130,42 @@ class local__chart_formatter extends TripalFieldFormatter {
       ddl($data, 'JS data');
 
       // Expose the data & settings to JS.
-      drupal_add_js(array('trpfancy_fields' => array('local__chart' => $data)), 'setting');
-      drupal_add_js(array('trpfancy_fields' => array('settings' => $js_settings)), 'setting');
+      drupal_add_js(array('trpfancyFields' => array($field_name => $data)), 'setting');
 
-      // Add D3.js and our Pie chart javascript.
-      drupal_add_js('https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js');
-      // @todo implement the chart ;-P
-      //drupal_add_js(drupal_get_path('module','trpfancy_fields').'/theme/js/PieChart.js');
+      // Load the Tripal D3 API
+      tripald3_load_libraries();
 
-      // Add CSS
-      drupal_add_css('
-        #local-chart-summary #pie-chart {
-          padding: 50px 20px 20px 20px;
-        }
-        #local-chart-summary .legend-title {
-          font-weight: bold;
-        }', 'inline');
+      drupal_add_js('
+        Drupal.behaviors.'.$field_name.' = {
+          attach: function (context, settings) {
+
+            // Pull the data out of the javascript settings.
+            var data = Drupal.settings.trpfancyFields.'.$field_name.';
+
+            // Draw your chart.
+            tripalD3.drawFigure(
+              data,
+              {
+                "chartType" : "simplepie",
+                "elementId": "trpfancy-'.$field_name.'",
+                "height": 250,
+                "width": 500,
+                "keyPosition": "right",
+                "title": "' . $settings['title'] . '",
+                "legend": "' . $settings['legend'] . '",
+              }
+            );
+          }
+        };',
+        array('type' => 'inline')
+      );
 
       // Finally, add the markup.
       $element[0] = array(
         '#type' => 'markup',
         '#markup' => '
-          <div id="local-chart-summary" class="figure">
-            <div id="pie-chart"></div>
-            <div class="legend">
-              <span class="legend-title">Figure: ' . $settings['title'] . '</span>
-              <span class="legend-description">' . $settings['legend'] . '</span>
-            </div>
+          <div id="trpfancy-'.$field_name.'">
+            <!-- JS should draw the pie chart here -->
           </div>',
       );
 
