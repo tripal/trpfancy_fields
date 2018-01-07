@@ -173,8 +173,6 @@ class ChadoChartField extends TripalField {
       }
     }
 
-    ddl($filter_column, 'filter_value');
-
     // Then grab the information we need from the materialized view
     // and add it as the value.
     $query = "SELECT $label_column, $count_column
@@ -190,7 +188,5 @@ class ChadoChartField extends TripalField {
         'local:count' => $r->{$count_column},
       );
     }
-
-    ddl($entity->{$field_name}['und'][0]['value'], 'value');
   }
 }

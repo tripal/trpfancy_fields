@@ -10,7 +10,7 @@
  * Configuration:
  *   None yet available.
  */
-class local__single_series_pie_chart_formatter extends TripalFieldFormatter {
+class local__single_series_pie_chart_formatter extends ChadoFieldFormatter {
 
   // The default lable for this field.
   public static $default_label = 'Single-Series Pie Chart';
@@ -127,7 +127,6 @@ class local__single_series_pie_chart_formatter extends TripalFieldFormatter {
           );
         }
       }
-      ddl($data, 'JS data');
 
       // Expose the data & settings to JS.
       drupal_add_js(array('trpfancyFields' => array($field_name => $data)), 'setting');
