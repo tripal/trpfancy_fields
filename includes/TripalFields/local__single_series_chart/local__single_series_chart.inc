@@ -63,11 +63,11 @@ class local__single_series_chart extends ChadoChartField {
   // required for all TripalFields.
   public static $default_instance_settings = array(
     // The short name for the vocabulary (e.g. shcema, SO, GO, PATO, etc.).
-    'term_vocabulary' => 'local',
+    'term_vocabulary' => '',
     // The name of the term.
-    'term_name' => 'single series chart',
+    'term_name' => '',
     // The unique ID (i.e. accession) of the term.
-    'term_accession' => 'single series chart',
+    'term_accession' => '',
     // Set to TRUE if the site admin is not allowed to change the term
     // type, otherwise the admin can change the term mapped to a field.
     'term_fixed' => FALSE,

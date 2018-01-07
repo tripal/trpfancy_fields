@@ -171,6 +171,15 @@ class ChadoChartField extends TripalField {
       if (!empty($filter_field) && isset($entity->{$filter_field})) {
         $filter_value = $entity->{$filter_field}['und'][0]['value'];
       }
+      else {
+        tripal_report_error(
+          'trpfancy_fields',
+          TRIPAL_ERROR,
+          'Attempted to display %field but there was no value to filter on. Specifically, either field %filter_field had no value or a filter field was not specified.',
+          array('%field' => $field_name, '%filter_field' => $filter_field)
+        );
+        return FALSE;
+      }
     }
 
     // Then grab the information we need from the materialized view
