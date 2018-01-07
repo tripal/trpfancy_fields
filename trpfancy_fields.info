@@ -6,3 +6,4 @@ dependencies[] = tripal
 dependencies[] = tripald3
 
 files[] = includes/TripalFields/ChadoChartField.inc
+files[] = includes/TripalFields/ChadoChartFormatter.inc
