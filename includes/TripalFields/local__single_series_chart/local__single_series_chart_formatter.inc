@@ -183,7 +183,8 @@ class local__single_series_chart_formatter extends TripalFieldFormatter {
    *
    */
   public function settingsSummary($view_mode) {
-    return 'Chart';
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    return '<strong>Title:</strong> ' . $settings['title'];
   }
 
 }

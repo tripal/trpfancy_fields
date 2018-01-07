@@ -206,7 +206,8 @@ class local__single_series_pie_chart_formatter extends ChadoFieldFormatter {
    *
    */
   public function settingsSummary($view_mode) {
-    return 'Pie Chart';
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    return '<strong>Title:</strong> ' . $settings['title'];
   }
 
 }
