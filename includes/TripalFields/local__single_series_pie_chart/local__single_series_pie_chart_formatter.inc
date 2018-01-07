@@ -60,17 +60,28 @@ class local__single_series_pie_chart_formatter extends ChadoFieldFormatter {
   public function settingsForm($view_mode, $form, &$form_state) {
     $element = array();
 
+    // Retrieve the current settings.
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    if (!isset($settings['title'])) { $settings['title'] = self::$default_settings['title']; }
+    if (!isset($settings['legend'])) { $settings['legend'] = self::$default_settings['legend']; }
+
+    // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
+    $element['msg'] = array(
+      '#type' => 'markup',
+      '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
+    );
+
     $element['title'] = array(
       '#type' => 'textfield',
       '#title' => 'Figure Title',
-      '#default_value' => self::$default_settings['title'],
+      '#default_value' => $settings['title'],
       '#description' => 'A breif title for the figure.',
     );
 
     $element['legend'] = array(
       '#type' => 'textarea',
       '#title' => 'Figure Legend',
-      '#default_value' => self::$default_settings['legend'],
+      '#default_value' => $settings['legend'],
       '#description' => 'Should describe the figure to the user.',
     );
 
