@@ -198,4 +198,88 @@ class ChadoChartField extends TripalField {
       );
     }
   }
+
+  /**
+   * Provides a form for the 'Field Settings' of an instance of this field.
+   *
+   * This function corresponds to the hook_field_instance_settings_form()
+   * function of the Drupal Field API.
+   *
+   * Validation of the instance settings form is not supported by Drupal, but
+   * the TripalField class does provide a mechanism for supporting validation.
+   * To allow for validation of your setting form you must call the parent
+   * in your child class:
+   *
+   * @code
+   *   $element = parent::instanceSettingsForm();
+   * @endcode
+   *
+   * Please note, the form generated with this function does not easily
+   * support AJAX calls in the same way that other Drupal forms do.  If you
+   * need to use AJAX you must manually alter the $form in your ajax call.
+   * The typical way to handle updating the form via an AJAX call is to make
+   * the changes in the form function itself but that doesn't work here.
+   */
+  public function instanceSettingsForm() {
+    $settings = $this->instance['settings'];
+    $element = array();
+
+    parent::instanceSettingsForm();
+
+
+    // The chart shown is able to be specific to the Drupal page by using a
+    // Drupal/Tripal/Chado field to filter the materialized view. For example,
+    // if you are on the "Tripalus databasica" organism page, then you may want
+    // a chart showing the ratio/count of "Tripalus databasica" sequence
+    // features. This is done using a combination of the filter_field (Drupal)
+    // and filter_column (Materialized View).
+    //-----------------------------------------------------
+
+    // Drupal/Tripal/Chado field to filter the materialized view on.
+    $element['filter_field'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Filter Field',
+      '#description' => 'Use this setting to specify the Drupal/Tripal/Chado field containing the value to filter the materialized view on. For example, if you want records from the materialized view with the value of the taxrank__species Chado field then select that field here. <strong>This will be ignored if you select the "Use Chado Record ID" checkbox below.</strong>',
+    );
+
+    // Use the chado primary key instead of the filter field above.
+    $element['use_record_id'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Use Chado Record ID',
+      '#description' => 'Use this setting if the value you would like to filter on is the primary key of the chado record being displayed on the page. For example, if you are adding this chart to organism pages and you would like the organism_id for the current page to be used to filter the materialized view, then select this checkbox.',
+    );
+
+    // The following relate to the materialized view:
+    //-----------------------------------------------------
+    // The table name of the materialized view to pull data from.
+    $element['materialized_view'] =array(
+      '#type' => 'textfield',
+      '#title' => 'Materialized View',
+      '#description' => 'The materialized view you would like to pull the data for the chart from.',
+    );
+
+    // The column whose value should be the category labels on the chart.
+    $element['label_column'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Label Column',
+      '#description' => 'The column from the materialized view whose value should be the category labels within a single series of data.',
+    );
+
+    // The column containing the numbers determining the category size.
+    $element['count_column'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Count Column',
+      '#description' => 'The column from the materialized view whose value should be the category count within a single series of data.',
+    );
+
+    // The column to filter the materialized view based on. This is usually
+    // a foreign key but doesn't have to be.
+    $element['filter_column'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Filter Column',
+      '#description' => 'The column from the materialized view whose value should equal the value of the filter field or the chado record ID indicated above.',
+    );
+
+    return $element;
+  }
 }
