@@ -221,11 +221,13 @@ class ChadoChartField extends TripalField {
    * the changes in the form function itself but that doesn't work here.
    */
   public function instanceSettingsForm() {
+
+    // Retrieve the current settings.
+    // If this field was just created these will contain the default values.
     $settings = $this->instance['settings'];
-    $element = array();
 
-    parent::instanceSettingsForm();
-
+    // Allow the parent Tripal Field to set up the form element for us.
+    $element = parent::instanceSettingsForm();
 
     // The chart shown is able to be specific to the Drupal page by using a
     // Drupal/Tripal/Chado field to filter the materialized view. For example,
@@ -234,50 +236,58 @@ class ChadoChartField extends TripalField {
     // features. This is done using a combination of the filter_field (Drupal)
     // and filter_column (Materialized View).
     //-----------------------------------------------------
-
-    // Drupal/Tripal/Chado field to filter the materialized view on.
-    $element['filter_field'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Filter Field',
-      '#description' => 'Use this setting to specify the Drupal/Tripal/Chado field containing the value to filter the materialized view on. For example, if you want records from the materialized view with the value of the taxrank__species Chado field then select that field here. <strong>This will be ignored if you select the "Use Chado Record ID" checkbox below.</strong>',
-    );
-
-    // Use the chado primary key instead of the filter field above.
-    $element['use_record_id'] = array(
-      '#type' => 'checkbox',
-      '#title' => 'Use Chado Record ID',
-      '#description' => 'Use this setting if the value you would like to filter on is the primary key of the chado record being displayed on the page. For example, if you are adding this chart to organism pages and you would like the organism_id for the current page to be used to filter the materialized view, then select this checkbox.',
+    $element['data'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Chart Data Source',
+      '#description' => 'The data for this chart will be pulled from the materialized view specified below. Additonally you must configure which columns in the materialized view should be the source of the data and which should be used to filter the results.',
     );
 
     // The following relate to the materialized view:
     //-----------------------------------------------------
     // The table name of the materialized view to pull data from.
-    $element['materialized_view'] =array(
+    $element['data']['materialized_view'] = array(
       '#type' => 'textfield',
+      '#required' => TRUE,
       '#title' => 'Materialized View',
       '#description' => 'The materialized view you would like to pull the data for the chart from.',
+      '#default_value' => $settings['materialized_view'],
+      '#weight' => -10,
     );
 
-    // The column whose value should be the category labels on the chart.
-    $element['label_column'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Label Column',
-      '#description' => 'The column from the materialized view whose value should be the category labels within a single series of data.',
-    );
-
-    // The column containing the numbers determining the category size.
-    $element['count_column'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Count Column',
-      '#description' => 'The column from the materialized view whose value should be the category count within a single series of data.',
+    $element['data']['filter_msg'] = array(
+      '#type' => 'item',
+      '#markup' => 'The materialized view indicated likely has data for multiple Tripal Content Pages. Thus, to ensure the chart is specific to the current page, we must filter the materialized view. This is done by indicated a column in the materialized view (the filter column) that should equal the value of a Drupal/Tripal/Chado field (the filter field) for the current page.',
+      '#weight' => 100,
     );
 
     // The column to filter the materialized view based on. This is usually
     // a foreign key but doesn't have to be.
-    $element['filter_column'] = array(
+    $element['data']['filter_column'] = array(
       '#type' => 'textfield',
+      '#required' => TRUE,
       '#title' => 'Filter Column',
       '#description' => 'The column from the materialized view whose value should equal the value of the filter field or the chado record ID indicated above.',
+      '#default_value' => $settings['filter_column'],
+      '#weight' => 101
+    );
+
+    // Drupal/Tripal/Chado field to filter the materialized view on.
+    $element['data']['filter_field'] = array(
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#title' => 'Filter Field',
+      '#description' => 'Use this setting to specify the Drupal/Tripal/Chado field containing the value to filter the materialized view on. For example, if you want records from the materialized view with the value of the taxrank__species Chado field then select that field here. <strong>This will be ignored if you select the "Use Chado Record ID" checkbox below.</strong>',
+      '#default_value' => $settings['filter_field'],
+      '#weight' => 102,
+    );
+
+    // Use the chado primary key instead of the filter field above.
+    $element['data']['use_record_id'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Use Chado Record ID',
+      '#description' => 'Use this setting if the value you would like to filter on is the primary key of the chado record being displayed on the page. For example, if you are adding this chart to organism pages and you would like the organism_id for the current page to be used to filter the materialized view, then select this checkbox.',
+      '#default_value' => $settings['use_record_id'],
+      '#weight' => 103,
     );
 
     return $element;
