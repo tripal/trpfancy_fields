@@ -66,29 +66,52 @@ class local__single_series_chart extends ChadoChartField {
     // Allow the parent Tripal Field to set up the form element for us.
     $element = parent::instanceSettingsForm();
 
-    $element['data']['data_msg'] = array(
+    $element['data_options']['data_msg'] = array(
       '#type' => 'item',
       '#markup' => 'Each series of data in this chart consists of multiple "categories" where each category has a label and a count. For example, a chart showing the types of features for a given organism would have labels such as "gene", "genetic marker", "SNP" and the counts would indicate the number of genes, genetic markers and SNPs available for the given organism.',
     );
 
     // The column whose value should be the category labels on the chart.
-    $element['data']['label_column'] = array(
+    $element['data_options']['label_column'] = array(
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => 'Label Column',
       '#description' => 'The column from the materialized view whose value should be the category labels within a single series of data.',
-      '#default_value' => $settings['label_column'],
+      '#default_value' => $settings['data_options']['label_column'],
     );
 
     // The column containing the numbers determining the category size.
-    $element['data']['count_column'] = array(
+    $element['data_options']['count_column'] = array(
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => 'Count Column',
       '#description' => 'The column from the materialized view whose value should be the category count within a single series of data.',
-      '#default_value' => $settings['count_column'],
+      '#default_value' => $settings['data_options']['count_column'],
     );
 
     return $element;
+  }
+
+  /**
+   *
+   */
+  public function instanceSettingsFormValidate($form, &$form_state) {
+
+    parent::instanceSettingsFormValidate($form, $form_state);
+    $values = $form_state['values']['instance']['settings']['data_options'];
+
+    // Check the label column exists.
+    if (!chado_column_exists($values['materialized_view'], $values['label_column'])) {
+      form_set_error('instance][settings][data_options][label_column',
+        t('The <em>Label Column</em> must exist in the %mview materialized view',
+          array('%mview' => $values['materialized_view'])));
+    }
+
+    // Check the count column exists.
+    if (!chado_column_exists($values['materialized_view'], $values['count_column'])) {
+      form_set_error('instance][settings][data_options][count_column',
+        t('The <em>Count Column</em> must exist in the %mview materialized view',
+          array('%mview' => $values['materialized_view'])));
+    }
   }
 }

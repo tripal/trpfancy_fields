@@ -8,8 +8,8 @@
  * *** MUST BE EXTENDED ***
  * NULL Values in $default_instance_settings must be set in the child class.
  *
- * Data:
- *   Data is pulled from a configured materialized view and filtered based on a
+ * data:
+ *   data is pulled from a configured materialized view and filtered based on a
  *   specific Tripal/Chado field.
  * Assumptions:
  *   - None currently identified.
@@ -86,28 +86,30 @@ class ChadoChartField extends TripalField {
     // features. This is done using a combination of the filter_field (Drupal)
     // and filter_column (Materialized View).
     //-----------------------------------------------------
-    // Use this setting to specify the Drupal/Tripal/Chado field containing the
-    // value to filter the materialized view on. For example, if you want
-    // `organism_feature_count.species = taxrank__species` then you set the
-    // `filter_field = taxrank__species` and the `filter_column = species`.
-    'filter_field' => NULL,
-    // Use this setting if the value you would like to filter on is the primary
-    // key of the chado record being displayed on the page. For example, if you
-    // want `organism_feature_count.organism_id = chado_record->organism_id`
-    // then you set `use_record_id = TRUE` and `filter_column = organism_id`.
-    'use_record_id' => FALSE,
+    'data_options' => array(
+      // Use this setting to specify the Drupal/Tripal/Chado field containing the
+      // value to filter the materialized view on. For example, if you want
+      // `organism_feature_count.species = taxrank__species` then you set the
+      // `filter_field = taxrank__species` and the `filter_column = species`.
+      'filter_field' => NULL,
+      // Use this setting if the value you would like to filter on is the primary
+      // key of the chado record being displayed on the page. For example, if you
+      // want `organism_feature_count.organism_id = chado_record->organism_id`
+      // then you set `use_record_id = TRUE` and `filter_column = organism_id`.
+      'use_record_id' => FALSE,
 
-    // The following relate to the materialized view:
-    //-----------------------------------------------------
-    // The table name of the materialized view to pull data from.
-    'materialized_view' => NULL,
-    // The column whose value should be the category labels on the chart.
-    'label_column' => NULL,
-    // The column containing the numbers determining the category size.
-    'count_column' => NULL,
-    // The column to filter the materialized view based on. This is usually
-    // a foreign key but doesn't have to be.
-    'filter_column' => NULL,
+      // The following relate to the materialized view:
+      //-----------------------------------------------------
+      // The table name of the materialized view to pull data from.
+      'materialized_view' => NULL,
+      // The column whose value should be the category labels on the chart.
+      'label_column' => NULL,
+      // The column containing the numbers determining the category size.
+      'count_column' => NULL,
+      // The column to filter the materialized view based on. This is usually
+      // a foreign key but doesn't have to be.
+      'filter_column' => NULL,
+    ),
   );
 
   // A boolean specifying that users should not be allowed to create
@@ -155,12 +157,12 @@ class ChadoChartField extends TripalField {
     $field_name = $this->instance['field_name'];
 
     // Retrieve the default settings for use when loading data.
-    $table_name = $this->instance['settings']['materialized_view'];
-    $label_column = $this->instance['settings']['label_column'];
-    $count_column = $this->instance['settings']['count_column'];
-    $filter_column = $this->instance['settings']['filter_column'];
-    $filter_field = $this->instance['settings']['filter_field'];
-    $use_record_id = $this->instance['settings']['use_record_id'];
+    $table_name = $this->instance['settings']['data_options']['materialized_view'];
+    $label_column = $this->instance['settings']['data_options']['label_column'];
+    $count_column = $this->instance['settings']['data_options']['count_column'];
+    $filter_column = $this->instance['settings']['data_options']['filter_column'];
+    $filter_field = $this->instance['settings']['data_options']['filter_field'];
+    $use_record_id = $this->instance['settings']['data_options']['use_record_id'];
 
     // Grab the primary key of the chado record.
     if ($use_record_id) {
@@ -229,14 +231,7 @@ class ChadoChartField extends TripalField {
     // Allow the parent Tripal Field to set up the form element for us.
     $element = parent::instanceSettingsForm();
 
-    // The chart shown is able to be specific to the Drupal page by using a
-    // Drupal/Tripal/Chado field to filter the materialized view. For example,
-    // if you are on the "Tripalus databasica" organism page, then you may want
-    // a chart showing the ratio/count of "Tripalus databasica" sequence
-    // features. This is done using a combination of the filter_field (Drupal)
-    // and filter_column (Materialized View).
-    //-----------------------------------------------------
-    $element['data'] = array(
+    $element['data_options'] = array(
       '#type' => 'fieldset',
       '#title' => 'Chart Data Source',
       '#description' => 'The data for this chart will be pulled from the materialized view specified below. Additonally you must configure which columns in the materialized view should be the source of the data and which should be used to filter the results.',
@@ -245,16 +240,21 @@ class ChadoChartField extends TripalField {
     // The following relate to the materialized view:
     //-----------------------------------------------------
     // The table name of the materialized view to pull data from.
-    $element['data']['materialized_view'] = array(
-      '#type' => 'textfield',
+    $options = array();
+    foreach (tripal_get_mviews() as $mview) {
+      $options[ $mview->name ] = $mview->name;
+    }
+    $element['data_options']['materialized_view'] = array(
+      '#type' => 'select',
       '#required' => TRUE,
+      '#options' => $options,
       '#title' => 'Materialized View',
       '#description' => 'The materialized view you would like to pull the data for the chart from.',
-      '#default_value' => $settings['materialized_view'],
+      '#default_value' => $settings['data_options']['materialized_view'],
       '#weight' => -10,
     );
 
-    $element['data']['filter_msg'] = array(
+    $element['data_options']['filter_msg'] = array(
       '#type' => 'item',
       '#markup' => 'The materialized view indicated likely has data for multiple Tripal Content Pages. Thus, to ensure the chart is specific to the current page, we must filter the materialized view. This is done by indicated a column in the materialized view (the filter column) that should equal the value of a Drupal/Tripal/Chado field (the filter field) for the current page.',
       '#weight' => 100,
@@ -262,34 +262,81 @@ class ChadoChartField extends TripalField {
 
     // The column to filter the materialized view based on. This is usually
     // a foreign key but doesn't have to be.
-    $element['data']['filter_column'] = array(
+    $element['data_options']['filter_column'] = array(
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => 'Filter Column',
       '#description' => 'The column from the materialized view whose value should equal the value of the filter field or the chado record ID indicated above.',
-      '#default_value' => $settings['filter_column'],
+      '#default_value' => $settings['data_options']['filter_column'],
       '#weight' => 101
     );
 
     // Drupal/Tripal/Chado field to filter the materialized view on.
-    $element['data']['filter_field'] = array(
-      '#type' => 'textfield',
+    $fields = field_info_instances($this->instance['entity_type'], $this->instance['bundle']);
+    $options = array();
+    foreach ($fields as $f) {
+      $options[ $f['field_name'] ] = $f['field_name'];
+    }
+    $element['data_options']['filter_field'] = array(
+      '#type' => 'select',
       '#required' => TRUE,
       '#title' => 'Filter Field',
       '#description' => 'Use this setting to specify the Drupal/Tripal/Chado field containing the value to filter the materialized view on. For example, if you want records from the materialized view with the value of the taxrank__species Chado field then select that field here. <strong>This will be ignored if you select the "Use Chado Record ID" checkbox below.</strong>',
-      '#default_value' => $settings['filter_field'],
+      '#default_value' => $settings['data_options']['filter_field'],
+      '#options' => $options,
       '#weight' => 102,
     );
 
     // Use the chado primary key instead of the filter field above.
-    $element['data']['use_record_id'] = array(
+    $element['data_options']['use_record_id'] = array(
       '#type' => 'checkbox',
       '#title' => 'Use Chado Record ID',
       '#description' => 'Use this setting if the value you would like to filter on is the primary key of the chado record being displayed on the page. For example, if you are adding this chart to organism pages and you would like the organism_id for the current page to be used to filter the materialized view, then select this checkbox.',
-      '#default_value' => $settings['use_record_id'],
+      '#default_value' => $settings['data_options']['use_record_id'],
       '#weight' => 103,
     );
 
     return $element;
+  }
+
+  /**
+   *
+   */
+  public function instanceSettingsFormValidate($form, &$form_state) {
+
+    $values = $form_state['values']['instance']['settings']['data_options'];
+
+    // Check that the materialized view exists.
+    $mview_id = tripal_get_mview_id($values['materialized_view']);
+    if (!$mview_id) {
+      form_set_error('instance][settings][data_options][materialized_view', 'The Materialized view must have been created through the Tripal API.');
+    }
+
+    // Check the filter column exists.
+    if (!chado_column_exists($values['materialized_view'], $values['filter_column'])) {
+      form_set_error('instance][settings][data_options][filter_column',
+        t('The <em>Filter Column</em> must exist in the %mview materialized view.',
+          array('%mview' => $values['materialized_view'])));
+    }
+
+    // Retrieve the field info for the filter field chosen.
+    $field = field_info_field($values['filter_field']);
+    // Check that the field exists.
+    if (!$field) {
+      form_set_error('instance][settings][data_options][filter_field',
+        t('The <em>Filter Field</em> must exist.', array()));
+    }
+    elseif (!isset($field['bundles']['TripalEntity'])) {
+      form_set_error('instance][settings][data_options][filter_field',
+        t('The <em>Filter Field</em> must be attached to the current Tripal Content Type.', array()));
+    }
+    else {
+      // Check that this field is attached to the current Tripal Entity type.
+      $bundle = $form_state['values']['instance']['bundle'];
+      if (array_search($bundle, $field['bundles']['TripalEntity']) === FALSE) {
+        form_set_error('instance][settings][data_options][filter_field',
+          t('The <em>Filter Field</em> must be attached to the current Tripal Content Type.', array()));
+      }
+    }
   }
 }
