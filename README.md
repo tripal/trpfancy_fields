@@ -1,8 +1,12 @@
 # Tripal Fancy Fields
 
-**UNDER ACTIVE DEVELOPMENT**
+This module provides additional fields for use with Tripal 3. The current version provides a single-series chart field that can be displayed as a pie, donut, or bar chart, as well as, a simple table. Future versions will provide support for multi-series datasets, pedigree's, hierarchy/relationship diagrams, and quick searches. These fields are highly configurable and use your existing materialized views as the datasource which allows them to be fast and flexible.
 
-**NOT READY FOR USE**
+## Installation
+This module is installed the same as any Drupal module. 
+### Dependencies
+1. [Tripal 3.x](https://github.com/tripal/tripal)
+2. [Tripal D3](https://github.com/tripal/tripald3)
 
 ## How To Use this Module
 ### Through the UI
@@ -20,6 +24,10 @@ If you would like even more control over the field then is provided through the 
 4. Implement hook_bundle_fields_info() and hook_bundle_instances_info() to attach your field to a Tripal Content Type or add it through the UI just like you would a regular Tripal Fancy Field.
 
 ## Single-Series Chart Field
-**UNDER DEVELOPMENT**
+This field is designed to make adding single-series charts to your Tripal Content Pages easy! The data is pulled from a materialized view of your choosing and filtered based on a specified field. For example, you could choose to add a chart to your organism pages showing the proportion of feature types for that organism. There are multiple display types available for this field including: pie, donut and bar charts, as well as, a simple table. See [Tripal D3](https://github.com/tripal/tripald3) for examples of the charts.
 
-This field is designed to make adding single-series charts to your Tripal Content Pages easy! The data is pulled from a materialized view of your choosing and filtered based on a specified field. For example, you could choose to add a chart to your organism pages showing the proportion of feature types for that organism. There are multiple display types available for this field including: pie, donut and bar charts, as well as, a simple table.
+## Future Development
+- Multi-series Chart Field
+- Pedigree Field
+- Quick Search Field
+- Hierarchy/Relationship Field
