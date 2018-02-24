@@ -18,6 +18,81 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
   // The list of field types for which this formatter is appropriate.
   public static $field_types = array('local__single_series_chart');
 
+  // The list of default settings for this formatter.
+  // Due to the different charts available and the dependance upon the data,
+  // it is too difficult to make a good default for the title and legend.
+  // As such I am making a horrible one in the hopes of making admin change it ;-p.
+  public static $default_settings = array(
+    'title' => 'Fancy Chart summarizing Stuff',
+    'legend' => 'This should describe the chart including the data that goes into it and how to interpret that data. Furthermore, it is always a good idea to highlight how users can interact with this chart.',
+    // Supports either 'top' or 'bottom'. This refers to the legend only,
+    // title is always at the top.
+    'legend_pos' => 'top',
+    // Supports either 'data' or 'info'.
+    'table_type' => 'data',
+  );
+
+  /**
+   * Provides the field's setting form.
+   *
+   * This function corresponds to the hook_field_formatter_settings_form()
+   * function of the Drupal Field API.
+   *
+   * The settings form appears on the 'Manage Display' page of the content
+   * type administration page. This function provides the form that will
+   * appear on that page.
+   *
+   * To add a validate function, please create a static function in the
+   * implementing class, and indicate that this function should be used
+   * in the form array that is returned by this function.
+   *
+   * This form will not be displayed if the formatter_settings_summary()
+   * function does not return anything.
+   *
+   * param $field
+   *   The field structure being configured.
+   * param $instance
+   *   The instance structure being configured.
+   * param $view_mode
+   *   The view mode being configured.
+   * param $form
+   *   The (entire) configuration form array, which will usually have no use
+   *   here.  Typically for reference only.
+   * param $form_state
+   *   The form state of the (entire) configuration form.
+   *
+   * @return
+   *   A Drupal Form array containing the settings form for this field.
+   */
+  public function settingsForm($view_mode, $form, &$form_state) {
+
+    // Grab the parent settings form in all it's glory.
+    $element = parent::settingsForm($view_mode, $form, $form_state);
+
+    // Retrieve the current settings not handled by our parent.
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    if (!isset($settings['legend_pos'])) { $settings['legend_pos'] = self::$default_settings['legend_pos']; }
+    if (!isset($settings['table_type'])) { $settings['table_type'] = self::$default_settings['table_type']; }
+
+    $element['legend_pos'] = array(
+      '#type' => 'radios',
+      '#title' => 'Legend Postion',
+      '#description' => 'The position of the "Figure Legend" text filled out above in respect to the table itself.',
+      '#options' => array('top' => 'top', 'bottom' => 'bottom'),
+      '#default_value' => $settings['legend_pos'],
+    );
+
+    $element['table_type'] = array(
+      '#type' => 'radios',
+      '#title' => 'Table Type',
+      '#description' => 'The type of table to generate where <strong>data</strong> refers to the typical data table with header on top and <strong>info</strong> refers to the typical Tripal info tables where the header is down the side and consists of your category labels.',
+      '#options' => array('data' => 'data', 'info' => 'info'),
+      '#default_value' => $settings['table_type'],
+    );
+
+    return $element;
+  }
+
   /**
    *  Provides the display for a field
    *
@@ -61,14 +136,53 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
       // Load the Tripal D3 API
       tripald3_load_libraries();
 
+      // Defaults based on table type.
+      //  -- Info.
+      if ($settings['table_type'] == 'info') {
+        // If the table type is info we don't need a traditional header, because
+        // our data includes the header (first column).
+        $header = NULL;
+        $column_is_header = TRUE;
+
+
+      }
+      // -- Data (default).
+      else {
+        $header = array('label' => 'Category', 'count' => 'Amount');
+        $column_is_header = FALSE;
+      }
+
+      // Legend Position.
+      if ($settings['legend_pos'] == 'bottom') {
+        $caption = '<span class="tripald3-legend"><span class="tripald3-title">'.$settings['title'].'</span></span>';
+        $footer = '<span class="tripald3-legend"><span class="tripald3-desc">'.$settings['legend'].'</span></span>';
+      }
+      else {
+        $footer = FALSE;
+        $caption = '<span class="tripald3-legend">'
+          . '<span class="tripald3-title">Table: ' . $settings['title'] . '.</span> '
+          . '<span class="tripald3-desc">' . $settings['legend'] . '</span>'
+          . '</span>';
+      }
+
       // Format the data.
       $rows = array();
       foreach ($items as $key => $value) {
         foreach ($value['value']['hydra:member'] as $part) {
-          $rows[] = array(
-            'label' => $part['rdfs:label'],
+
+          // Compile the row.
+          $row = array(
+            'label' => array('data' => $part['rdfs:label']),
             'count' => number_format($part['local:count']),
           );
+
+          // Indicate if the first column should be a header.
+          if ($column_is_header) {
+            $row['label']['header'] = TRUE;
+          }
+
+          // Finally, add the current row to the table.
+          $rows[] = $row;
         }
       }
 
@@ -76,16 +190,17 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
       $element[0] = array(
         '#type' => 'markup',
         '#theme' => 'table',
-        '#header' => array('label' => 'Category', 'count' => 'Amount'),
+        '#header' => $header,
         '#rows' => $rows,
         '#attributes' => array(
-          'class' => array('tripald3-chart'),
+          'class' => array('tripald3-chart', $settings['table_type']),
         ),
-        '#caption' => '<span class="tripald3-legend">'
-          . '<span class="tripald3-title">Table: ' . $settings['title'] . '.</span> '
-          . '<span class="tripald3-desc">' . $settings['legend'] . '</span>'
-          . '</span>',
+        '#caption' => $caption,
       );
+
+      if ($footer) {
+        $element[0]['#suffix'] = '<div class="trpfancy-table-footer">'.$footer.'</div>';
+      }
 
     }
     else {
