@@ -168,6 +168,22 @@ class ChadoChartField extends TripalField {
     $label_column = $this->instance['settings']['data_options']['label_column'];
     $count_column = $this->instance['settings']['data_options']['count_column'];
 
+    // Backwards compatible filters.
+    // Originally, we only supported a single filter.
+    if (isset($this->instance['settings']['data_options']['filter_column'])) {
+      $this->instance['settings']['data_options']['filters'] = array( array(
+        'filter_column' => $this->instance['settings']['data_options']['filter_column'],
+        'filter_field' => $this->instance['settings']['data_options']['filter_field'],
+        'use_record_id' => $this->instance['settings']['data_options']['use_record_id'],
+      ));
+
+      unset(
+        $this->instance['settings']['data_options']['filter_column'],
+        $this->instance['settings']['data_options']['filter_field'],
+        $this->instance['settings']['data_options']['use_record_id']
+      );
+    }
+
     // Fill in the filters.
     $where_clause = array();
     $where_args = array();
@@ -176,7 +192,7 @@ class ChadoChartField extends TripalField {
       $where_clause[$k] = $filter_info['filter_column'] . '=:filter_value' . $k;
 
       // Grab the primary key of the chado record.
-      if (isset($filter_info['use_record_id']) && $filter_info['use_record_id'] === TRUE) {
+      if (isset($filter_info['use_record_id']) && $filter_info['use_record_id'] === 1) {
         $where_args[':filter_value'.$k] = $entity->chado_record_id;
       }
       // Or grab the value of a configured Dripal/Tripal/Chado field.
