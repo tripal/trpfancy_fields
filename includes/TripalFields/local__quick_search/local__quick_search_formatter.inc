@@ -153,6 +153,17 @@ class local__quick_search_formatter extends TripalFieldFormatter {
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
     // Get the settings
     $settings = $display['settings'];
+
+    // Retrieve my form (implemented below this class).
+    $form = drupal_get_form('local__quick_search_field_view_form', $settings);
+
+    // Render it and pass it as the markup for this field.
+    $element[0] = array(
+      '#type' => 'markup',
+      '#markup' => drupal_render($form),
+    );
+
+    return $element;
   }
 
   /**
@@ -189,4 +200,74 @@ class local__quick_search_formatter extends TripalFieldFormatter {
 
   }
 
+}
+
+/**
+ * Quick Search form rendered via local__quick_search::view on Tripal Content Pages.
+ *
+ * @param $form
+ *   Nested array of form elements that comprise the form.
+ * @param $form_state
+ *   A keyed array containing the current state of the form.
+ *
+ * @return
+ *   Completed $form above.
+ */
+function local__quick_search_field_view_form($form, $form_state) {
+
+  // Retrieve the formatter settings from thr build info.
+  $settings = $form_state['build_info']['args'][0];
+
+  $form['path'] = array(
+    '#type' => 'hidden',
+    '#value' => $settings['path'],
+  );
+
+  $form['key'] = array(
+    '#type' => 'hidden',
+    '#value' => $settings['key'],
+  );
+
+  $form['value'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Search Terms',
+    '#title_display' => 'invisible',
+    '#attributes' => array(
+      'placeholder' => $settings['placeholder'],
+    ),
+    '#description' => $settings['help_text'],
+    '#autocomplete_path' => $settings['autocomplete_path'],
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => $settings['button_text'],
+  );
+
+  return $form;
+}
+
+/**
+ * SUBMIT: Quick Search form rendered via local__quick_search::view on Tripal Content Pages.
+ *
+ * @param $form
+ *   Nested array of form elements that comprise the form.
+ * @param $form_state
+ *   A keyed array containing the current state of the form.
+ *
+ * @return
+ *   Completed $form above.
+ */
+function local__quick_search_field_view_form_submit($form, &$form_state) {
+
+  $form_state['redirect'] = array(
+    $form_state['values']['path'],
+    array(
+      'query' => array(
+        $form_state['values']['key'] => $form_state['values']['value'],
+      ),
+    ),
+  );
+
+  dpm($form_state, 'form state');
 }

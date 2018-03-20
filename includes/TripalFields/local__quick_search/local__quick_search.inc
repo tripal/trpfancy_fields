@@ -106,5 +106,10 @@ class local__quick_search extends TripalField {
    *
    */
   public function load($entity) {
+
+    // THIS FIELD MUST CONTAIN DATA IN ORDER FOR THE FORMATTER TO BE RENDERED.
+    $field_name = $this->instance['field_name'];
+    $entity->{$field_name}['und'][0]['value'] = '';
+
   }
 }
