@@ -62,6 +62,68 @@ class local__quick_search_formatter extends TripalFieldFormatter {
    */
   public function settingsForm($view_mode, $form, &$form_state) {
 
+    // Grab the parent settings form in all it's glory.
+    $element = parent::settingsForm($view_mode, $form, $form_state);
+
+    // Retrieve the current settings not handled by our parent.
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    $our_setting_keys = array('path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path');
+    foreach ($our_setting_keys as $k) {
+      if (!isset($settings[$k])) { $settings[$k] = self::$default_settings[$k]; }
+    }
+
+    // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
+    $element['msg'] = array(
+      '#type' => 'markup',
+      '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
+    );
+
+    $element['path'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Search Path',
+      '#required' => TRUE,
+      '#description' => 'This is the relative path of the search page you would like to redirect the user to.',
+      '#default_value' => $settings['path'],
+    );
+
+    $element['key'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Query Parameter Key',
+      '#required' => TRUE,
+      '#description' => 'This key is used in the query parameters to tell your full search which filter to apply the value to.',
+      '#default_value' => $settings['key'],
+    );
+
+    $element['button_text'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Button Text',
+      '#required' => TRUE,
+      '#description' => 'The text on the search button.',
+      '#default_value' => $settings['button_text'],
+    );
+
+    $element['placeholder'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Placeholder Text',
+      '#description' => 'This will appear greyed out within the search textfield and should be used to tell your user the kinds of values they can enter.',
+      '#default_value' => $settings['placeholder'],
+    );
+
+    $element['autocomplete_path'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Autocomplete Path',
+      '#description' => 'The path the AJAX autocomplete script uses as the source for autocompletion.',
+      '#default_value' => $settings['autocomplete_path'],
+    );
+
+    $element['help_text'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Help Text',
+      '#description' => 'Guidance to your users for how to use the quick search form.',
+      '#default_value' => $settings['help_text'],
+    );
+
+    return $element;
   }
 
   /**
@@ -121,6 +183,9 @@ class local__quick_search_formatter extends TripalFieldFormatter {
    *
    */
   public function settingsSummary($view_mode) {
+
+    $settings = $this->instance['display'][$view_mode]['settings'];
+    return '<strong>Full Search Path:</strong> ' . $settings['path'] . '?' . $settings['key'] . '=[search terms]';
 
   }
 
