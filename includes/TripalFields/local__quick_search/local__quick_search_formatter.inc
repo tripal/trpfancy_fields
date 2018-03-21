@@ -266,6 +266,22 @@ function local__quick_search_field_view_form($form, $form_state) {
   // Retrieve the formatter settings from thr build info.
   $settings = $form_state['build_info']['args'][0];
 
+  $form['#attached']['css'][] = array(
+    'type' => 'inline',
+    'data' => '
+      #local-quick-search-field-view-form .help-text {
+        font-size: 0.9em;
+        font-style: italic;
+      }
+      #local-quick-search-field-view-form .form-item.form-type-textfield {
+        display: inline;
+      }
+      #local-quick-search-field-view-form #edit-submit {
+        display: inline;
+      }
+    ',
+  );
+
   $form['path'] = array(
     '#type' => 'hidden',
     '#value' => $settings['path'],
@@ -281,6 +297,11 @@ function local__quick_search_field_view_form($form, $form_state) {
     '#value' => $settings['qparams'],
   );
 
+  $form['help_text'] = array(
+    '#type' => 'markup',
+    '#markup' => '<span class="help-text">' . $settings['help_text'] . '</span>',
+  );
+
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => 'Search Terms',
@@ -288,7 +309,6 @@ function local__quick_search_field_view_form($form, $form_state) {
     '#attributes' => array(
       'placeholder' => $settings['placeholder'],
     ),
-    '#description' => $settings['help_text'],
     '#autocomplete_path' => $settings['autocomplete_path'],
   );
 
