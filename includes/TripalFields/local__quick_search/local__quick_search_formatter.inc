@@ -26,6 +26,7 @@ class local__quick_search_formatter extends TripalFieldFormatter {
     'placeholder' => 'Search terms',
     'button_text' => 'Search',
     'autocomplete_path' => '',
+    'filter_qstring' => '',
   );
 
   /**
@@ -67,7 +68,7 @@ class local__quick_search_formatter extends TripalFieldFormatter {
 
     // Retrieve the current settings not handled by our parent.
     $settings = $this->instance['display'][$view_mode]['settings'];
-    $our_setting_keys = array('path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path');
+    $our_setting_keys = array('path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path', 'filter_qstring');
     foreach ($our_setting_keys as $k) {
       if (!isset($settings[$k])) { $settings[$k] = self::$default_settings[$k]; }
     }
@@ -123,6 +124,13 @@ class local__quick_search_formatter extends TripalFieldFormatter {
       '#default_value' => $settings['help_text'],
     );
 
+    $element['filter_qstring'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Additional Filter Criteria',
+      '#description' => 'Use this field to add additional filter criteria to the URL query string upon submimt. Each additional criteria should be indicated on a seperate line using the key=value format. Tokens of the format `[field machine name]` can be used to make these filter dynamic.',
+      '#default_value' => $settings['filter_qstring'],
+    );
+
     return $element;
   }
 
@@ -153,6 +161,46 @@ class local__quick_search_formatter extends TripalFieldFormatter {
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
     // Get the settings
     $settings = $display['settings'];
+
+    // Process the additional query params.
+    // We do this here so we can fill in the values of the fields
+    // and so we don't increase time during the redirect.
+    // Start our main paramter which will later be entered by the user.
+    $settings['qparams'] = array($settings['key'] => '[value]');
+
+    // Then, if there are any additional query params, we will process them line-by-line.
+    // @assumption: each additional query param is on it's own line.
+    if (!empty($settings['filter_qstring'])) {
+
+      $lines = explode("\n", $settings['filter_qstring']);
+      foreach ($lines as $line) {
+
+        $line = trim($line);
+
+        // Check if there's a field token & if so, replace it.
+        $matches = array();
+        if (preg_match('/\[(\w+)\]/', $line, $matches)) {
+          $key = '[' . $matches[1] . ']';
+          $values = field_get_items($entity_type, $entity, $matches[1]);
+          if ($values === FALSE) {
+            tripal_report_error('trpfancy_fields', TRIPAL_WARNING,
+              'Quick Search Field %name: %token not found, replaced with empty string.',
+              array('$name' => $this->instance['field_name'], '%token' => $key));
+          }
+
+          foreach ($values as $v) {
+            $value = $v['safe_value'];
+            $line = str_replace($key, $value, $line);
+          }
+        }
+
+        // Extract the key and value to add to the params list.
+        $matches = array();
+        if (preg_match('/^(\w+\[*\]*)=(\w+)$/', $line, $matches)) {
+          $settings['qparams'][$matches[1]] = $matches[2];
+        }
+      }
+    }
 
     // Retrieve my form (implemented below this class).
     $form = drupal_get_form('local__quick_search_field_view_form', $settings);
@@ -228,6 +276,11 @@ function local__quick_search_field_view_form($form, $form_state) {
     '#value' => $settings['key'],
   );
 
+  $form['qparams'] = array(
+    '#type' => 'hidden',
+    '#value' => $settings['qparams'],
+  );
+
   $form['value'] = array(
     '#type' => 'textfield',
     '#title' => 'Search Terms',
@@ -260,14 +313,12 @@ function local__quick_search_field_view_form($form, $form_state) {
  */
 function local__quick_search_field_view_form_submit($form, &$form_state) {
 
+  // Start our params with the value entered by the user.
+  $form_state['values']['qparams'][$form_state['values']['key']] = $form_state['values']['value'];
+
+
   $form_state['redirect'] = array(
     $form_state['values']['path'],
-    array(
-      'query' => array(
-        $form_state['values']['key'] => $form_state['values']['value'],
-      ),
-    ),
+    array( 'query' => $form_state['values']['qparams'] ),
   );
-
-  dpm($form_state, 'form state');
 }
