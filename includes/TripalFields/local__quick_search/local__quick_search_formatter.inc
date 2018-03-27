@@ -272,6 +272,7 @@ function local__quick_search_field_view_form($form, $form_state) {
       #local-quick-search-field-view-form .help-text {
         font-size: 0.9em;
         font-style: italic;
+        display: block;
       }
       #local-quick-search-field-view-form .form-item.form-type-textfield {
         display: inline;
