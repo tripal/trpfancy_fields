@@ -5,3 +5,24 @@
 
 // Includes all non-class field functions.
 include('includes/trpfancy_fields.fields.inc');
+
+/**
+ * Add all terms needed for our fields
+ * @todo move this into an install file.
+ */
+function trpfancy_fields_add_field_terms() {
+
+  $terms = array(
+    array(
+      'cv_name' => 'local',
+      'id' => 'local:quick_search',
+      'name' => 'Quick Search',
+      'definition' => 'Provide a quick search on entity pages which submits/redirects to a full search.',
+    ),
+  );
+
+  // Now add each term.
+  foreach ($terms as $term) {
+    tripal_insert_cvterm($term);
+  }
+}
