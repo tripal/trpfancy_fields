@@ -12,7 +12,7 @@
  *   - browse button text.
  *   - autocomplete path.
  */
-class local__quick_browse_formatter extends ChadoChartFormatter {
+class local__quick_browse_formatter extends TripalFieldFormatter {
 
   // The default label for this field.
   public static $default_label = 'Simple Quick Browse';

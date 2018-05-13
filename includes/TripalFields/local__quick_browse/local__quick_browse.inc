@@ -6,7 +6,7 @@
  * Data: No data.
  * Assumptions:
  */
-class local__quick_browse extends ChadoChartField {
+class local__quick_browse extends TripalField {
 
   // --------------------------------------------------------------------------
   //                     EDITABLE STATIC CONSTANTS
@@ -18,7 +18,7 @@ class local__quick_browse extends ChadoChartField {
   // The default label for this field.
   public static $default_label = 'Quick Browse';
   // The default description for this field.
-  public static $default_description = 'A simple quick browse which submits/redirects to a full browse.';
+  public static $default_description = 'A simple quick browse which submits/redirects to an appropriately filtered search page.';
   // The default widget for this field.
   public static $default_widget = 'local__quick_browse';
   // The default formatter for this field.
@@ -65,6 +65,10 @@ class local__quick_browse extends ChadoChartField {
     // should have auto_attach set to FALSE so tha their values can be
     // attached asynchronously.
     'auto_attach' => FALSE,
+    // The table where the options for this specific field are stored.
+    // This can be one of trpfancy_browse_options or trpfancy_browse_options_per_entity
+    // based on admin configuration. Default: trpfancy_browse_options.
+    'option_storage' => 'trpfancy_browse_options',
   );
 
   // A boolean specifying that users should not be allowed to create
@@ -108,8 +112,66 @@ class local__quick_browse extends ChadoChartField {
   public function load($entity) {
 
     // THIS FIELD MUST CONTAIN DATA IN ORDER FOR THE FORMATTER TO BE RENDERED.
+    // @todo load the options here :-)
+
+    // Based on configuration, the options will either be stored in
+    // 1) trpfancy_browse_options:
+    //    when options are global to all entities for the given field.
+
+    // 2) trpfancy_browse_options_per_entity
+    //    when options are specific to a given entity for the current field.
+
+    // Legacy: assumed no data to load...
     $field_name = $this->instance['field_name'];
     $entity->{$field_name}['und'][0]['value'] = '';
 
+  }
+
+  /**
+   * Provides a form for the 'Field Settings' of an instance of this field.
+   *
+   * This function corresponds to the hook_field_instance_settings_form()
+   * function of the Drupal Field API.
+   *
+   * Validation of the instance settings form is not supported by Drupal, but
+   * the TripalField class does provide a mechanism for supporting validation.
+   * To allow for validation of your setting form you must call the parent
+   * in your child class:
+   *
+   * @code
+   *   $element = parent::instanceSettingsForm();
+   * @endcode
+   *
+   * Please note, the form generated with this function does not easily
+   * support AJAX calls in the same way that other Drupal forms do.  If you
+   * need to use AJAX you must manually alter the $form in your ajax call.
+   * The typical way to handle updating the form via an AJAX call is to make
+   * the changes in the form function itself but that doesn't work here.
+   */
+  public function instanceSettingsForm() {
+
+    // Retrieve the current settings.
+    // If this field was just created these will contain the default values.
+    $settings = $this->instance['settings'];
+
+    // Allow the parent Tripal Field to set up the form element for us.
+    $element = parent::instanceSettingsForm();
+
+    // Simple radio buttons to select whether you want your options
+    // per entity or constant for this field.
+    $element['option_storage'] = array(
+      '#type' => 'radios',
+      '#title' => 'Browser Option Source',
+      '#options' => array(
+        'trpfancy_browse_options' => 'A. Constant for this Field',
+        'trpfancy_browse_options_per_entity' => 'B. Dependant on the page shown',
+      ),
+      '#description' => 'The browser field breaks down a set of options by
+        "Browser Type". Depending on your choice here, the options can be a) constant
+        for the field (e.g. same options for all organisms) or they can be
+        b) specific to the page being shown (e.g. Specific to a given organism).',
+    );
+
+    return $element;
   }
 }

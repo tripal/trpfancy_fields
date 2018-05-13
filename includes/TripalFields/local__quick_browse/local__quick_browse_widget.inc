@@ -3,12 +3,13 @@
  * @class
  * Purpose: Provide a quick browse on entity pages which submits/redirects to a full browse.
  *
- * Allowing edit? No
+ * Allowing edit? Edits the options.
+ * Choice for option_storage depends where the options are stored.
  */
 class local__quick_browse_widget extends TripalFieldWidget {
 
   // The default lable for this field.
-  public static $default_label = 'No Edits';
+  public static $default_label = 'Option Editor';
 
   // The list of field types for which this formatter is appropriate.
   public static $field_types = array('local__quick_browse');
