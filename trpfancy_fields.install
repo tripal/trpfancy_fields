@@ -1,0 +1,90 @@
+<?php
+/**
+ * @file
+ * Handles installation of this module
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function trpfancy_fields_schema() {
+  $schema = array();
+
+  //-------------------------
+  // Quick Browse Field
+  // A) Options are Constant for a given field instance.
+  $schema['trpfancy_browse_options'] = array(
+    'description' => 'Stores options that are constant for a given field instance.',
+    'fields' => array(
+      'option_id' => array(
+        'description' => 'The primary identifier for the option.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'field_id' => array(
+        'description' => 'The field instance these options are for.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'key' => array(
+        'description' => 'The key for the given option. This should be a machine friendly name for the option.',
+        'type' => 'varchar',
+        'not null' => TRUE
+      ),
+      'value' => array(
+        'description' => 'The key for the given option. This should be a machine friendly name for the option.',
+        'type' => 'varchar',
+        'not null' => TRUE
+      ),
+    ),
+    'indexes' => array(
+      'field_id' => array('field_id'),
+    ),
+    'unique keys' => array( ),
+    'primary key' => array('option_id'),
+  );
+
+  // B) Options are specific to an entity / field instance combination.
+  $schema['trpfancy_browse_options_per_entity'] = array(
+    'description' => 'Stores options that are specific to the entity for a given field instance.',
+    'fields' => array(
+      'option_id' => array(
+        'description' => 'The primary identifier for the option.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'field_id' => array(
+        'description' => 'The field instance these options are for.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'entity_id' => array(
+        'description' => 'The entity these options are for.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'key' => array(
+        'description' => 'The key for the given option. This should be a machine friendly name for the option.',
+        'type' => 'varchar',
+        'not null' => TRUE
+      ),
+      'value' => array(
+        'description' => 'The key for the given option. This should be a machine friendly name for the option.',
+        'type' => 'varchar',
+        'not null' => TRUE
+      ),
+    ),
+    'indexes' => array(
+      'field_id' => array('field_id', 'entity_id'),
+    ),
+    'unique keys' => array( ),
+    'primary key' => array('option_id'),
+  );
+
+  return $schema;
+}

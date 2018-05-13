@@ -122,8 +122,10 @@ class local__quick_browse extends TripalField {
     //    when options are specific to a given entity for the current field.
 
     // Legacy: assumed no data to load...
-    $field_name = $this->instance['field_name'];
-    $entity->{$field_name}['und'][0]['value'] = '';
+    if (isset($this->instance)) {
+      $field_name = $this->instance['field_name'];
+      $entity->{$field_name}['und'][0]['value'] = '';
+    }
 
   }
 
