@@ -28,6 +28,11 @@ function trpfancy_fields_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE
       ),
+      'category' => array(
+        'description' => 'The category the option belongs to.',
+        'type' => 'varchar',
+        'not null' => TRUE
+      ),
       'key' => array(
         'description' => 'The key for the given option. This should be a machine friendly name for the option.',
         'type' => 'varchar',
@@ -66,6 +71,11 @@ function trpfancy_fields_schema() {
         'description' => 'The entity these options are for.',
         'type' => 'int',
         'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'category' => array(
+        'description' => 'The category the option belongs to.',
+        'type' => 'varchar',
         'not null' => TRUE
       ),
       'key' => array(
