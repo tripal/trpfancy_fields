@@ -22,7 +22,7 @@ function trpfancy_fields_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE
       ),
-      'field_id' => array(
+      'instance_id' => array(
         'description' => 'The field instance these options are for.',
         'type' => 'int',
         'unsigned' => TRUE,
@@ -45,7 +45,7 @@ function trpfancy_fields_schema() {
       ),
     ),
     'indexes' => array(
-      'field_id' => array('field_id'),
+      'field_id' => array('instance_id'),
     ),
     'unique keys' => array( ),
     'primary key' => array('option_id'),
@@ -61,7 +61,7 @@ function trpfancy_fields_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE
       ),
-      'field_id' => array(
+      'instance_id' => array(
         'description' => 'The field instance these options are for.',
         'type' => 'int',
         'unsigned' => TRUE,
@@ -90,7 +90,7 @@ function trpfancy_fields_schema() {
       ),
     ),
     'indexes' => array(
-      'field_id' => array('field_id', 'entity_id'),
+      'field_id' => array('instance_id', 'entity_id'),
     ),
     'unique keys' => array( ),
     'primary key' => array('option_id'),
