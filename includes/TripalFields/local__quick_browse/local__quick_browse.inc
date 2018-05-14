@@ -111,21 +111,26 @@ class local__quick_browse extends TripalField {
    */
   public function load($entity) {
 
-    // THIS FIELD MUST CONTAIN DATA IN ORDER FOR THE FORMATTER TO BE RENDERED.
-    // @todo load the options here :-)
+    // We need the field name to ensure we save the data in the correct field!
+    $field_name = $this->instance['field_name'];
+    $instance_id = $this->instance['id'];
+
+    // Retrieve the settings.
+    $settings = $this->instance['settings'];
 
     // Based on configuration, the options will either be stored in
     // 1) trpfancy_browse_options:
     //    when options are global to all entities for the given field.
+    if ($settings['option_storage'] == 'trpfancy_browse_options') {
+      $query = 'SELECT * FROM {trpfancy_browse_options} WHERE instance_id=:id';
+      $results = db_query($query, array(':id' => $instance_id));
+      foreach($results as $opt) {
+        $entity->{$field_name}['und'][0]['value'][$opt->category][$opt->key] = $opt->value;
+      }
+    }
 
     // 2) trpfancy_browse_options_per_entity
     //    when options are specific to a given entity for the current field.
-
-    // Legacy: assumed no data to load...
-    if (isset($this->instance)) {
-      $field_name = $this->instance['field_name'];
-      $entity->{$field_name}['und'][0]['value'] = '';
-    }
 
   }
 
