@@ -110,13 +110,5 @@ class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
       );
 
     }
-    else {
-      $element[0] = array(
-        '#type' => 'markup',
-        '#markup' => 'No Data.'
-      );
-    }
-
   }
-
 }
