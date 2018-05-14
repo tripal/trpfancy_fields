@@ -236,6 +236,11 @@ class ChadoChartField extends TripalField {
         'local:count' => $r->{$count_column},
       );
     }
+
+    // Ensure we don't return markup if there is no data.
+    if ($results->rowCount() < 1) {
+      unset($entity->{$field_name});
+    }
   }
 
   /**

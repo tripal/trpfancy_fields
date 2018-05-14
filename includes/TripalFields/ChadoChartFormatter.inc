@@ -185,16 +185,6 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
       );
 
     }
-    // If we don't have any items, then don't show a chart
-    // but instead inform the user there is no data.
-    // NOTE: This will only be shown if the content type settings are to
-    //   show empty fields. By default it will be hidden.
-    else {
-      $element[0] = array(
-        '#type' => 'markup',
-        '#markup' => 'No Data.'
-      );
-    }
   }
 
   /**
