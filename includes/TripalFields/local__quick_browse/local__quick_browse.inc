@@ -168,6 +168,7 @@ class local__quick_browse extends TripalField {
         'trpfancy_browse_options' => 'A. Constant for this Field',
         'trpfancy_browse_options_per_entity' => 'B. Dependant on the page shown',
       ),
+      '#default_value' => $settings['option_storage'],
       '#description' => 'The browser field breaks down a set of options by
         "Browser Type". Depending on your choice here, the options can be a) constant
         for the field (e.g. same options for all organisms) or they can be
