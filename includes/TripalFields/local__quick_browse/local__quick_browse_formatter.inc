@@ -20,13 +20,9 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
   public static $field_types = array('local__quick_browse');
   // The list of default settings for this formatter.
   public static $default_settings = array(
-    'path' => '',
-    'key' => 'value',
-    'help_text' => 'Enter your browse terms below. On submit, a new page will be opened where additional browse criteria are available.',
-    'placeholder' => 'Browse terms',
     'button_text' => 'Browse',
-    'autocomplete_path' => '',
-    'filter_qstring' => '',
+    'help_text' => 'Choose what you would like to browse from the drop-down. Clicking one of the resulting links will take you to a listing for further browsing.',
+    'categories' => array(),
   );
 
   /**
@@ -68,9 +64,34 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
 
     // Retrieve the current settings not handled by our parent.
     $settings = $this->instance['display'][$view_mode]['settings'];
-    $our_setting_keys = array('path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path', 'filter_qstring');
-    foreach ($our_setting_keys as $k) {
-      if (!isset($settings[$k])) { $settings[$k] = self::$default_settings[$k]; }
+
+    // Process the Browser Types set in the "Edit Field" form.
+    $types = array();
+    $lines = explode("\n", $this->instance['settings']['browser_types']);
+    foreach ($lines as $line) {
+
+      $line = trim($line);
+
+      // Extract the key and value to add to the types list.
+      $matches = array();
+      if (preg_match('/^(\w+)=(\w+)$/', $line, $matches)) {
+        $types[$matches[1]] = $matches[2];
+      }
+    }
+
+    // Ensure each browser type has a config form in the categories.
+    foreach ($types as $k => $v) {
+      if (!isset($settings['categories'][$k])) {
+        $settings['categories'][$k] = array(
+          'type' => $v,
+          'path' => NULL,
+          'key' => NULL,
+          'filter_qstring' => NULL,
+        );
+      }
+      else {
+        $settings['categories'][$k]['type'] = $v;
+      }
     }
 
     // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
@@ -79,21 +100,50 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
       '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
     );
 
-    $element['path'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Browse Path',
-      '#required' => TRUE,
-      '#description' => 'This is the relative path of the browse page you would like to redirect the user to.',
-      '#default_value' => $settings['path'],
+    $element['categories'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Browser Types',
+      '#description' => 'This field has a "Browse by [drop-down]" where the values in the
+        drop-down will be the "Browser Types" you configure here. There will be a dedicated
+        list of browse options for each "Browser Type" that will redirect the user to a
+        partially filtered search. For Example, where "Browser Type" is "Type" on an
+        organism page, the options might include "Gene","mRNA","Genetic Marker", "variant", etc.',
     );
 
-    $element['key'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Query Parameter Key',
-      '#required' => TRUE,
-      '#description' => 'This key is used in the query parameters to tell your full browse which filter to apply the value to.',
-      '#default_value' => $settings['key'],
-    );
+    foreach ($settings['categories'] as $category => $category_settings) {
+      $element['categories'][$category] = array(
+        '#type' => 'fieldset',
+        '#title' => $category_settings['type'],
+      );
+
+      $element['categories'][$category]['type'] = array(
+        '#type' => 'hidden',
+        '#value' => $category_settings['type'],
+      );
+
+      $element['categories'][$category]['path'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Browse Path',
+        '#required' => TRUE,
+        '#description' => 'This is the relative path of the browse page you would like to redirect the user to.',
+        '#default_value' => $category_settings['path'],
+      );
+
+      $element['categories'][$category]['key'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Query Parameter Key',
+        '#required' => TRUE,
+        '#description' => 'This key is used in the query parameters to tell your full browse which filter to apply the value to.',
+        '#default_value' => $category_settings['key'],
+      );
+
+      $element['categories'][$category]['filter_qstring'] = array(
+        '#type' => 'textarea',
+        '#title' => 'Additional Filter Criteria',
+        '#description' => 'Use this field to add additional filter criteria to the URL query string upon submimt. Each additional criteria should be indicated on a seperate line using the key=value format. Tokens of the format `[field machine name]` can be used to make these filter dynamic.',
+        '#default_value' => $category_settings['filter_qstring'],
+      );
+    }
 
     $element['button_text'] = array(
       '#type' => 'textfield',
@@ -103,32 +153,11 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
       '#default_value' => $settings['button_text'],
     );
 
-    $element['placeholder'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Placeholder Text',
-      '#description' => 'This will appear greyed out within the browse textfield and should be used to tell your user the kinds of values they can enter.',
-      '#default_value' => $settings['placeholder'],
-    );
-
-    $element['autocomplete_path'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Autocomplete Path',
-      '#description' => 'The path the AJAX autocomplete script uses as the source for autocompletion.',
-      '#default_value' => $settings['autocomplete_path'],
-    );
-
     $element['help_text'] = array(
       '#type' => 'textarea',
       '#title' => 'Help Text',
       '#description' => 'Guidance to your users for how to use the quick browse form.',
       '#default_value' => $settings['help_text'],
-    );
-
-    $element['filter_qstring'] = array(
-      '#type' => 'textarea',
-      '#title' => 'Additional Filter Criteria',
-      '#description' => 'Use this field to add additional filter criteria to the URL query string upon submimt. Each additional criteria should be indicated on a seperate line using the key=value format. Tokens of the format `[field machine name]` can be used to make these filter dynamic.',
-      '#default_value' => $settings['filter_qstring'],
     );
 
     return $element;
@@ -162,48 +191,61 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
-    // Process the additional query params.
-    // We do this here so we can fill in the values of the fields
-    // and so we don't increase time during the redirect.
-    // Start our main paramter which will later be entered by the user.
-    $settings['qparams'] = array($settings['key'] => '[value]');
+    $browser_types = array();
+    foreach ($settings['categories'] as $type => $info) {
 
-    // Then, if there are any additional query params, we will process them line-by-line.
-    // @assumption: each additional query param is on it's own line.
-    if (!empty($settings['filter_qstring'])) {
+      $browser_types[$type] = $info['type'];
 
-      $lines = explode("\n", $settings['filter_qstring']);
-      foreach ($lines as $line) {
+      // Process the additional query params.
+      // We do this here so we can fill in the values of the fields
+      // and so we don't increase time during the redirect.
+      // Start our main paramter which will later be entered by the user.
+      $settings['categories'][$type]['qparams'] = array($info['key'] => '[value]');
 
-        $line = trim($line);
+      // Then, if there are any additional query params, we will process them line-by-line.
+      // @assumption: each additional query param is on it's own line.
+      if (!empty($info['filter_qstring'])) {
 
-        // Check if there's a field token & if so, replace it.
-        $matches = array();
-        if (preg_match('/\[(\w+)\]/', $line, $matches)) {
-          $key = '[' . $matches[1] . ']';
-          $values = field_get_items($entity_type, $entity, $matches[1]);
-          if ($values === FALSE) {
-            tripal_report_error('trpfancy_fields', TRIPAL_WARNING,
-              'Quick Browse Field %name: %token not found, replaced with empty string.',
-              array('$name' => $this->instance['field_name'], '%token' => $key));
+        $lines = explode("\n", $info['filter_qstring']);
+        foreach ($lines as $line) {
+
+          $line = trim($line);
+
+          // Check if there's a field token & if so, replace it.
+          $matches = array();
+          if (preg_match('/\[(\w+)\]/', $line, $matches)) {
+            $key = '[' . $matches[1] . ']';
+            $values = field_get_items($entity_type, $entity, $matches[1]);
+            if ($values === FALSE) {
+              tripal_report_error('trpfancy_fields', TRIPAL_WARNING,
+                'Quick Browse Field %name: %token not found, replaced with empty string.',
+                array('$name' => $this->instance['field_name'], '%token' => $key));
+            }
+
+            foreach ($values as $v) {
+              $value = $v['safe_value'];
+              $line = str_replace($key, $value, $line);
+            }
           }
 
-          foreach ($values as $v) {
-            $value = $v['safe_value'];
-            $line = str_replace($key, $value, $line);
+          // Extract the key and value to add to the params list.
+          $matches = array();
+          if (preg_match('/^(\w+\[*\]*)=(\w+)$/', $line, $matches)) {
+            $settings['categories'][$type]['qparams'][$matches[1]] = $matches[2];
           }
-        }
-
-        // Extract the key and value to add to the params list.
-        $matches = array();
-        if (preg_match('/^(\w+\[*\]*)=(\w+)$/', $line, $matches)) {
-          $settings['qparams'][$matches[1]] = $matches[2];
         }
       }
     }
 
     // Retrieve my form (implemented below this class).
-    $form = drupal_get_form('local__quick_browse_field_view_form', $settings);
+    $form = drupal_get_form(
+      'local__quick_browse_field_view_form',
+      array(
+        'settings' => $settings,
+        'options' => $items[0]['value'],
+        'browser_types' => $browser_types,
+      )
+    );
 
     // Render it and pass it as the markup for this field.
     $element[0] = array(
@@ -244,7 +286,13 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
   public function settingsSummary($view_mode) {
 
     $settings = $this->instance['display'][$view_mode]['settings'];
-    return '<strong>Full Browse Path:</strong> ' . $settings['path'] . '?' . $settings['key'] . '=[browse terms]';
+
+    $types = array();
+    foreach ($settings['categories'] as $category => $values) {
+      $types[] = $values['type'];
+    }
+
+    return '<strong>Browser Types:</strong> ' . implode(', ',$types);
 
   }
 
@@ -263,60 +311,86 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
  */
 function local__quick_browse_field_view_form($form, $form_state) {
 
-  // Retrieve the formatter settings from thr build info.
-  $settings = $form_state['build_info']['args'][0];
+  // Retrieve the formatter settings from the build info.
+  $settings = $form_state['build_info']['args'][0]['settings'];
+  $options = $form_state['build_info']['args'][0]['options'];
+  $browser_types = $form_state['build_info']['args'][0]['browser_types'];
 
   $form['#attached']['css'][] = array(
     'type' => 'inline',
     'data' => '
-      #local-quick-browse-field-view-form .help-text {
-        font-size: 0.9em;
-        font-style: italic;
-        display: block;
+      #local-quick-browse-field-view-form {
+        margin-top: 10px;
       }
-      #local-quick-browse-field-view-form .form-item.form-type-textfield {
+      #local-quick-browse-field-view-form .item-list markup {
+        display: flex;
+        flex-wrap: wrap;
+        list-style-type: none;
+        margin: 10px;
+      }
+      #local-quick-browse-field-view-form .item-list markup li {
+        flex: 1 0 25%;
+        box-sizing: border-box;
+        padding: 10px;
+      }
+      #local-quick-browse-field-view-form .form-item-type label {
         display: inline;
       }
-      #local-quick-browse-field-view-form #edit-submit {
-        display: inline;
+      #local-quick-browse-field-view-form .form-item-type select {
+        width: 300px;
       }
     ',
   );
 
+  $current_type = 'type';
+  
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => 'Browse by',
+    '#options' => $browser_types,
+    '#default_value' => $current_type,
+    '#empty_option' => ' - Select -',
+    '#description' => $settings['help_text'],
+  );
+
   $form['path'] = array(
     '#type' => 'hidden',
-    '#value' => $settings['path'],
+    '#value' => $settings['categories'][$current_type]['path'],
   );
 
   $form['key'] = array(
     '#type' => 'hidden',
-    '#value' => $settings['key'],
+    '#value' => $settings['categories'][$current_type]['key'],
   );
 
   $form['qparams'] = array(
     '#type' => 'hidden',
-    '#value' => $settings['qparams'],
+    '#value' => $settings['categories'][$current_type]['qparams'],
   );
 
-  $form['help_text'] = array(
+  $list = array();
+  foreach($options[$current_type] as $k => $v) {
+    $params = $settings['categories'][$current_type]['qparams'];
+    $params[ $settings['categories'][$current_type]['key'] ] = $k;
+    $list[] = l(
+      $v,
+      $settings['categories'][$current_type]['path'],
+      array( 'query' => $params )
+    );
+  }
+
+  $form['options'] = array(
     '#type' => 'markup',
-    '#markup' => '<span class="help-text">' . $settings['help_text'] . '</span>',
+    '#theme' => 'item_list',
+    '#items' => $list,
   );
 
-  $form['value'] = array(
-    '#type' => 'textfield',
-    '#title' => 'Browse Terms',
-    '#title_display' => 'invisible',
-    '#attributes' => array(
-      'placeholder' => $settings['placeholder'],
-    ),
-    '#autocomplete_path' => $settings['autocomplete_path'],
-  );
-
+  /*
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => $settings['button_text'],
   );
+  */
 
   return $form;
 }

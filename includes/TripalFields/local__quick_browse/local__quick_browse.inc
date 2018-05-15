@@ -69,6 +69,8 @@ class local__quick_browse extends TripalField {
     // This can be one of trpfancy_browse_options or trpfancy_browse_options_per_entity
     // based on admin configuration. Default: trpfancy_browse_options.
     'option_storage' => 'trpfancy_browse_options',
+    // A list of browser types this field intends to provide.
+    'browser_types' => '',
   );
 
   // A boolean specifying that users should not be allowed to create
@@ -174,10 +176,25 @@ class local__quick_browse extends TripalField {
         'trpfancy_browse_options_per_entity' => 'B. Dependant on the page shown',
       ),
       '#default_value' => $settings['option_storage'],
+      '#required' => TRUE,
       '#description' => 'The browser field breaks down a set of options by
         "Browser Type". Depending on your choice here, the options can be a) constant
         for the field (e.g. same options for all organisms) or they can be
         b) specific to the page being shown (e.g. Specific to a given organism).',
+    );
+
+    $element['browser_types'] = array(
+      '#type' => 'textarea',
+      '#title' => 'Browser Types',
+      '#required' => TRUE,
+      '#description' => 'This field has a "Browse by [drop-down]" where the values in the
+        drop-down will be the "Browser Types" you configure here. There will be a dedicated
+        list of browse options for each "Browser Type" that will redirect the user to a
+        partially filtered search. For Example, where "Browser Type" is "Type" on an organism
+        page, the options might include "Gene","mRNA","Genetic Marker", "variant", etc.
+        <strong>Each Browser Type should be indicated on a seperate line using the
+        key=value format.</strong>',
+      '#default_value' => $settings['browser_types'],
     );
 
     return $element;
