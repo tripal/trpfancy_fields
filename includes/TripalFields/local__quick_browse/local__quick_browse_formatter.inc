@@ -309,7 +309,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
  * @return
  *   Completed $form above.
  */
-function local__quick_browse_field_view_form($form, $form_state) {
+function local__quick_browse_field_view_form($form, &$form_state) {
 
   // Retrieve the formatter settings from the build info.
   $settings = $form_state['build_info']['args'][0]['settings'];
@@ -342,13 +342,10 @@ function local__quick_browse_field_view_form($form, $form_state) {
     ',
   );
 
-  $current_type = 'type';
-  
   $form['type'] = array(
     '#type' => 'select',
     '#title' => 'Browse by',
     '#options' => $browser_types,
-    '#default_value' => $current_type,
     '#empty_option' => ' - Select -',
     '#description' => $settings['help_text'],
   );
@@ -368,30 +365,40 @@ function local__quick_browse_field_view_form($form, $form_state) {
     '#value' => $settings['categories'][$current_type]['qparams'],
   );
 
-  $list = array();
-  foreach($options[$current_type] as $k => $v) {
-    $params = $settings['categories'][$current_type]['qparams'];
-    $params[ $settings['categories'][$current_type]['key'] ] = $k;
-    $list[] = l(
-      $v,
-      $settings['categories'][$current_type]['path'],
-      array( 'query' => $params )
+  foreach (array_keys($browser_types) as $current_type) {
+    $list = array();
+    foreach($options[$current_type] as $k => $v) {
+      $params = $settings['categories'][$current_type]['qparams'];
+      $params[ $settings['categories'][$current_type]['key'] ] = $k;
+      $list[] = l(
+        $v,
+        $settings['categories'][$current_type]['path'],
+        array( 'query' => $params )
+      );
+    }
+
+    $form['options'][$current_type] = array(
+      '#type' => 'markup',
+      '#theme' => 'item_list',
+      '#items' => $list,
+      '#prefix' => '<div id="browse-options-'.str_replace(' ' ,'-',$current_type).'" class="browser-options" style="display:none;">',
+      '#suffix' => '</div>',
     );
   }
 
-  $form['options'] = array(
-    '#type' => 'markup',
-    '#theme' => 'item_list',
-    '#items' => $list,
-  );
-
-  /*
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $settings['button_text'],
-  );
-  */
-
+  // Finally add javascript that will show/hide based on select box.
+  // Note: We used js here rather then ajax because drupal ajax had trouble finding the form.
+  drupal_add_js('
+    Drupal.behaviors.trpfancyFieldsQuickBrowse = {
+      attach: function (context, settings) {
+        document.getElementById("edit-type").onchange = function (e) {
+          // Hide all browser options
+          jQuery(".browser-options").hide();
+          // Show the browser options by removing display:none.
+          jQuery("#browse-options-"+this.value).show();
+        };
+    }};
+    ', 'inline');
   return $form;
 }
 
@@ -406,14 +413,5 @@ function local__quick_browse_field_view_form($form, $form_state) {
  * @return
  *   Completed $form above.
  */
-function local__quick_browse_field_view_form_submit($form, &$form_state) {
+function local__quick_browse_field_view_form_submit($form, &$form_state) { }
 
-  // Start our params with the value entered by the user.
-  $form_state['values']['qparams'][$form_state['values']['key']] = $form_state['values']['value'];
-
-
-  $form_state['redirect'] = array(
-    $form_state['values']['path'],
-    array( 'query' => $form_state['values']['qparams'] ),
-  );
-}
