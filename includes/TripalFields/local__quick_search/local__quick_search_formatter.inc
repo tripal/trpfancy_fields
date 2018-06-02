@@ -269,15 +269,15 @@ function local__quick_search_field_view_form($form, $form_state) {
   $form['#attached']['css'][] = array(
     'type' => 'inline',
     'data' => '
-      #local-quick-search-field-view-form .help-text {
+      .field-type-local--quick-search .help-text {
         font-size: 0.9em;
         font-style: italic;
         display: block;
       }
-      #local-quick-search-field-view-form .form-item.form-type-textfield {
+      .field-type-local--quick-search .form-item.form-type-textfield {
         display: inline;
       }
-      #local-quick-search-field-view-form #edit-submit {
+      .field-type-local--quick-search #edit-submit {
         display: inline;
       }
     ',
