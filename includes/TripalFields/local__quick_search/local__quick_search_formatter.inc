@@ -261,7 +261,12 @@ class local__quick_search_formatter extends TripalFieldFormatter {
  * @return
  *   Completed $form above.
  */
-function local__quick_search_field_view_form($form, $form_state) {
+function local__quick_search_field_view_form($form, &$form_state) {
+
+  // Caches the form.
+  // This allows two Quick Searches to exist on the same page and ensures the correct
+  // one is submitted. See https://www.drupal.org/project/drupal/issues/2821852
+  $form_state['cache'] = TRUE;
 
   // Retrieve the formatter settings from thr build info.
   $settings = $form_state['build_info']['args'][0];
