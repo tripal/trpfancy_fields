@@ -104,7 +104,7 @@ function trpfancy_fields_schema() {
  */
 function trpfancy_fields_update_7001(&$sandbox) {
 
-  $spec = trpfancy_fields_schema();
+  $schema = trpfancy_fields_schema();
   db_create_table('trpfancy_browse_options', $schema['trpfancy_browse_options']);
   db_create_table('trpfancy_browse_options_per_entity', $schema['trpfancy_browse_options_per_entity']);
 

@@ -279,11 +279,15 @@ function local__quick_search_field_view_form($form, &$form_state) {
         font-style: italic;
         display: block;
       }
-      .field-type-local--quick-search .form-item.form-type-textfield {
-        display: inline;
+      .quick-search-container {
+        display: flex;
       }
-      .field-type-local--quick-search #edit-submit {
-        display: inline;
+      .field-type-local--quick-search .form-item.form-type-textfield {
+        margin-right: 7px;
+        flex-grow: 3;
+      }
+      .field-type-local--quick-search .form-item.form-type-textfield input {
+        width: 98%;
       }
     ',
   );
@@ -308,7 +312,13 @@ function local__quick_search_field_view_form($form, &$form_state) {
     '#markup' => '<span class="help-text">' . $settings['help_text'] . '</span>',
   );
 
-  $form['value'] = array(
+  $form['search'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div class="quick-search-container">',
+    '#suffix' => '</div>',
+  );
+
+  $form['search']['value'] = array(
     '#type' => 'textfield',
     '#title' => 'Search Terms',
     '#title_display' => 'invisible',
@@ -318,7 +328,7 @@ function local__quick_search_field_view_form($form, &$form_state) {
     '#autocomplete_path' => $settings['autocomplete_path'],
   );
 
-  $form['submit'] = array(
+  $form['search']['submit'] = array(
     '#type' => 'submit',
     '#value' => $settings['button_text'],
   );

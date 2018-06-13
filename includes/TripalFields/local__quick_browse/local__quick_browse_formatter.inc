@@ -191,8 +191,53 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
+    // Warn the admin if the field has not been configured.
+    if (empty($settings['categories'])) {
+      tripal_report_error(
+        'trpfancy_fields',
+        TRIPAL_ERROR,
+        'No Browser types available. Please configure the field, :field_name, <a href="@url">here</a>.',
+        array(':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/display'))
+      );
+      return $element;
+    }
+
+    // Warn the admin if there are no options for this field.
+    if (empty($items)) {
+      // How concerned we are depends on the type of storage chosen.
+      // If there is only one set of options for all entities of this type
+      // Then we are quire concerned...
+      if ($this->instance['settings']['option_storage'] == 'trpfancy_browse_options') {
+        tripal_report_error(
+          'trpfancy_fields',
+          TRIPAL_ERROR,
+          'No options available for :field_label (:field_name). Please add options by editing the field <a href="@url">here</a>.',
+          array(':field_label' => $this->instance['label'], ':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/fields/'.$this->instance['field_name']))
+        );
+      }
+      // However, if there are options per entity then it may just be that this particular
+      // entity shouldn't have options.
+      else {
+        tripal_report_error(
+          'trpfancy_fields',
+          TRIPAL_NOTICE,
+          'No options available for :entity_title. Please add options by editing the entity, <a href="@url">here</a>, and filling out :field_label in the form.',
+          array(':entity_title' => $entity->title, ':field_label' => $this->instance['label'], '@url' => url('/bio_data/'.$entity->id.'/edit'))
+        );
+      }
+      return $element;
+    }
+
+    // Save the options to be passed through to the form later.
+    $options = $items[0]['value'];
+
     $browser_types = array();
     foreach ($settings['categories'] as $type => $info) {
+
+      // If there are no options for the current browser type then don't add it.
+      if (!isset($options[ $type ])) {
+        continue;
+      }
 
       $browser_types[$type] = $info['type'];
 
@@ -242,7 +287,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
       'local__quick_browse_field_view_form',
       array(
         'settings' => $settings,
-        'options' => $items[0]['value'],
+        'options' => $options,
         'browser_types' => $browser_types,
       )
     );
@@ -322,6 +367,11 @@ function local__quick_browse_field_view_form($form, &$form_state) {
       #local-quick-browse-field-view-form {
         margin-top: 10px;
       }
+      #local-quick-browse-field-view-form .description {
+        font-size: 0.9em;
+        font-style: italic;
+        display: block;
+      }
       #local-quick-browse-field-view-form .item-list markup {
         display: flex;
         flex-wrap: wrap;
@@ -342,12 +392,17 @@ function local__quick_browse_field_view_form($form, &$form_state) {
     ',
   );
 
+  // Choose a default browser type ;-p.
+  reset($browser_types);
+  $default_type = key($browser_types);
+
   $form['type'] = array(
     '#type' => 'select',
-    '#title' => 'Browse by',
+    '#title' => 'Browse',
     '#options' => $browser_types,
     '#empty_option' => ' - Select -',
     '#description' => $settings['help_text'],
+    '#default_value' => $default_type,
   );
 
   $form['path'] = array(
@@ -391,6 +446,12 @@ function local__quick_browse_field_view_form($form, &$form_state) {
   drupal_add_js('
     Drupal.behaviors.trpfancyFieldsQuickBrowse = {
       attach: function (context, settings) {
+
+        // If the selectbox is set on page load, we should show the appropriate options.
+        var selected = document.getElementById("edit-type").value;
+        jQuery("#browse-options-"+selected).show();
+
+        // Ensure that when the selectbox is changed, the options change.
         document.getElementById("edit-type").onchange = function (e) {
           // Hide all browser options
           jQuery(".browser-options").hide();
@@ -399,6 +460,7 @@ function local__quick_browse_field_view_form($form, &$form_state) {
         };
     }};
     ', 'inline');
+
   return $form;
 }
 
