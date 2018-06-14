@@ -66,18 +66,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     $settings = $this->instance['display'][$view_mode]['settings'];
 
     // Process the Browser Types set in the "Edit Field" form.
-    $types = array();
-    $lines = explode("\n", $this->instance['settings']['browser_types']);
-    foreach ($lines as $line) {
-
-      $line = trim($line);
-
-      // Extract the key and value to add to the types list.
-      $matches = array();
-      if (preg_match('/^(\w+)=(\w+)$/', $line, $matches)) {
-        $types[$matches[1]] = $matches[2];
-      }
-    }
+    $types = local__quick_browse_get_browser_types($this->instance['settings']);
 
     // Ensure each browser type has a config form in the categories.
     foreach ($types as $k => $v) {

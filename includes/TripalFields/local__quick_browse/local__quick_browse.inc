@@ -200,3 +200,29 @@ class local__quick_browse extends TripalField {
     return $element;
   }
 }
+
+/**
+ * API: Process Browser Types
+ *
+ * @param $instance_settings
+ *   The instance settings for this field.
+ * @ return
+ *   An array of browser types where key: machine name, value: human-readable name.
+ */
+function local__quick_browse_get_browser_types($instance_settings) {
+  $types = array();
+
+  $lines = explode("\n", $instance_settings['browser_types']);
+  foreach ($lines as $line) {
+
+    $line = trim($line);
+
+    // Extract the key and value to add to the types list.
+    $matches = array();
+    if (preg_match('/^(\w+)=(\w+)$/', $line, $matches)) {
+      $types[$matches[1]] = $matches[2];
+    }
+  }
+
+  return $types;
+}

@@ -71,6 +71,51 @@ class local__quick_browse_widget extends TripalFieldWidget {
    */
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
+
+    // Make this field show a text area where options global to the field can be added.
+    // We need one text area per browser type... and thus first, we need the types.
+    $types = local__quick_browse_get_browser_types($this->instance['settings']);
+
+    // If there are no types yet... tell the admin what to do.
+    if (empty($types)) {
+      $widget['msg'] = array(
+        '#type' => 'markup',
+        '#markup' => '<div class="messages warning">'
+          .'You first need to set the <strong>Browser Types</strong> above, before you can set the default options for them.<br />'
+          .'<strong>NOTE: You need to save the browser types first and then re-edit this field to set the options.</strong>'
+          .'</div>'
+      );
+    }
+    else {
+      $widget['msg'] = array(
+        '#type' => 'markup',
+        '#markup' => '<div class="messages status">'
+          .'The options you set below will become the default for all entities of this type. If you have selected "Dependant on the page shown" as the "option Source" above, then these options can be changed on the edit page.'
+          .'</div>',
+        '#weight' => -100,
+      );
+
+      $widget['value'] = array(
+        '#tree' => TRUE,
+      );
+
+      foreach ($types as $machine_name => $label) {
+        $widget['value'][$machine_name] = array(
+          '#type' => 'textarea',
+          '#title' => '<em>' . $label . '</em> Options',
+          '#description' => 'Enter the list of options you want to appear when the user selects "Browse <em>'.$label.'</em>". <strong>Each Option should be indicated on a seperate line using the key=value format</strong>
+            where the key is the value saved by the module and the value is the option shown to the user.',
+        );
+      }
+
+      $widget['note'] = array(
+        '#type' => 'markup',
+        '#markup' => '<strong>NOTE: It may be more efficient or perferrable to set the options via an SQL query
+          (advanced users only). For options global to the field, insert into the <em>trpfancy_browse_options</em> table where the <em>instance_id='.$this->instance['id'].'</em>.
+          For options specific to each entity, insert into the <em>trpfancy_browse_options_per_entity</em> table where the <em>instance_id='.$this->instance['id'].'</em>.</strong>',
+        '#weight' => 100,
+      );
+    }
   }
 
   /**
@@ -83,6 +128,8 @@ class local__quick_browse_widget extends TripalFieldWidget {
    * fields must be used to set the 'value' field.
    */
   public function validate($element, $form, &$form_state, $langcode, $delta) {
+
+    //dpm($form_state, 'VALIDATE: form state');
   }
 
   /**
@@ -121,6 +168,8 @@ class local__quick_browse_widget extends TripalFieldWidget {
    *    The form state array.
    */
   public function submit($form, &$form_state, $entity_type, $entity, $langcode, $delta) {
+
+    //dpm($form_state, 'SUBMIT: form state');
   }
 
 }
