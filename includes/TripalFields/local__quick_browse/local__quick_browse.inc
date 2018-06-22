@@ -197,6 +197,39 @@ class local__quick_browse extends TripalField {
       '#default_value' => $settings['browser_types'],
     );
 
+    $element['options'] = array(
+      '#type' => 'item',
+      '#title' => 'Options',
+      '#markup' => '<p>Currently there is no UI for setting the option for a given browser type.
+        Instead it is recommended you add them to the database manually either via "psql" or "drush sql-query".</p>
+        <p>For example, the following query would insert 3 options for the browser type with
+        the key="type1". The browse field would create 3 links: "Exome Capture", "Genotype-by-Sequencing",
+        and "KASP". When the user clicks on a given link the "key" would be used in the URL
+        defined in the settings on the "Manage Display" page.</p>
+        <pre>
+          INSERT INTO {trpfancy_browse_options} (instance_id, category, key, value)
+            VALUES
+              ('.$this->instance['id'].', "type1", "1234", "Exome Capture"),
+              ('.$this->instance['id'].', "type1", "2345", "Genotype-by-Sequencing"),
+              ('.$this->instance['id'].', "type1", "3456", "KASP");
+        </pre>
+        <p>If you selected "A" for "Browser Option Source" above, this example query
+        provides the options for all entities this field is attached to. If you selected
+        "B" above, this example query provides a default option set for entities where
+        a specific option set has not been set. To add the same options + one more
+        for a specific entity you could use the following query (entity_id=5, instance_id='.$this->instance['id'].').</p>
+        <pre>
+          INSERT INTO {trpfancy_browse_options_per_entity} (entity_id, instance_id, category, key, value)
+            VALUES
+              (5, '.$this->instance['id'].', "type1", "1234", "Exome Capture"),
+              (5, '.$this->instance['id'].', "type1", "2345", "Genotype-by-Sequencing"),
+              (5, '.$this->instance['id'].', "type1", "3456", "KASP"),
+              (5, '.$this->instance['id'].', "type1", "4567", "SCAR");
+        </pre>',
+    );
+
+    // @todo Show the user what options they have already set.
+
     return $element;
   }
 }
