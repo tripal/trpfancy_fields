@@ -207,7 +207,7 @@ class local__quick_browse extends TripalField {
         and "KASP". When the user clicks on a given link the "key" would be used in the URL
         defined in the settings on the "Manage Display" page.</p>
         <pre>
-          INSERT INTO {trpfancy_browse_options} (instance_id, category, key, value)
+          INSERT INTO {trpfancy_browse_options} (instance_id, category, key, value) 
             VALUES
               ('.$this->instance['id'].', "type1", "1234", "Exome Capture"),
               ('.$this->instance['id'].', "type1", "2345", "Genotype-by-Sequencing"),
@@ -225,10 +225,33 @@ class local__quick_browse extends TripalField {
               (5, '.$this->instance['id'].', "type1", "2345", "Genotype-by-Sequencing"),
               (5, '.$this->instance['id'].', "type1", "3456", "KASP"),
               (5, '.$this->instance['id'].', "type1", "4567", "SCAR");
-        </pre>',
+        </pre>
+        <br />',
     );
 
-    // @todo Show the user what options they have already set.
+
+    // Show the user what options they have already set.
+    $results = db_query('SELECT * FROM {trpfancy_browse_options} WHERE instance_id=:id ORDER BY category ASC, value ASC',
+	array(':id' => $this->instance['id']));
+    $rows = array();
+    foreach($results as $r) {
+      $rows[] = array(
+        $r->category,
+        $r->key,
+        $r->value
+      );
+    }
+    if ($rows) {
+      $element['options']['#markup'] .= '<p><strong>Current Options</strong>: This table shows the default options you have for this field stored in trpfancy_browse_options.</p>';
+      $element['options']['#markup'] .= theme_table(array(
+        'header' => array('Browser Type', 'Key', 'Value'),
+        'rows' => $rows,
+        'attributes' => array(),
+      ));
+    }
+    else {
+      $element['options']['#markup'] .= '<p><strong>Current Options</strong>: You have no default options available for this field (instance_id: '.$this->instance['id'].'). Once you add them to the database following the instructions above, you will see them listed here.</p>';
+    }
 
     return $element;
   }
