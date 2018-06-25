@@ -19,6 +19,12 @@ function trpfancy_fields_add_field_terms() {
       'name' => 'Quick Search',
       'definition' => 'Provide a quick search on entity pages which submits/redirects to a full search.',
     ),
+    array(
+      'cv_name' => 'local',
+      'id' => 'local:gbrowse_image',
+      'name' => 'Gbrowse Image',
+      'definition' => 'A GBrowse image of a feature alignment to another sequence',
+    )
   );
 
   // Now add each term.
