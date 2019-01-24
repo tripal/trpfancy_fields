@@ -261,7 +261,12 @@ class local__quick_search_formatter extends TripalFieldFormatter {
  * @return
  *   Completed $form above.
  */
-function local__quick_search_field_view_form($form, $form_state) {
+function local__quick_search_field_view_form($form, &$form_state) {
+
+  // Caches the form.
+  // This allows two Quick Searches to exist on the same page and ensures the correct
+  // one is submitted. See https://www.drupal.org/project/drupal/issues/2821852
+  $form_state['cache'] = TRUE;
 
   // Retrieve the formatter settings from thr build info.
   $settings = $form_state['build_info']['args'][0];
@@ -269,16 +274,20 @@ function local__quick_search_field_view_form($form, $form_state) {
   $form['#attached']['css'][] = array(
     'type' => 'inline',
     'data' => '
-      #local-quick-search-field-view-form .help-text {
+      .field-type-local--quick-search .help-text {
         font-size: 0.9em;
         font-style: italic;
         display: block;
       }
-      #local-quick-search-field-view-form .form-item.form-type-textfield {
-        display: inline;
+      .quick-search-container {
+        display: flex;
       }
-      #local-quick-search-field-view-form #edit-submit {
-        display: inline;
+      .field-type-local--quick-search .form-item.form-type-textfield {
+        margin-right: 7px;
+        flex-grow: 3;
+      }
+      .field-type-local--quick-search .form-item.form-type-textfield input {
+        width: 98%;
       }
     ',
   );
@@ -303,7 +312,13 @@ function local__quick_search_field_view_form($form, $form_state) {
     '#markup' => '<span class="help-text">' . $settings['help_text'] . '</span>',
   );
 
-  $form['value'] = array(
+  $form['search'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div class="quick-search-container">',
+    '#suffix' => '</div>',
+  );
+
+  $form['search']['value'] = array(
     '#type' => 'textfield',
     '#title' => 'Search Terms',
     '#title_display' => 'invisible',
@@ -313,7 +328,7 @@ function local__quick_search_field_view_form($form, $form_state) {
     '#autocomplete_path' => $settings['autocomplete_path'],
   );
 
-  $form['submit'] = array(
+  $form['search']['submit'] = array(
     '#type' => 'submit',
     '#value' => $settings['button_text'],
   );
