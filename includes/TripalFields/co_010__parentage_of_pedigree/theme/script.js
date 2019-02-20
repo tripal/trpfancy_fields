@@ -56,9 +56,6 @@ Drupal.behaviors.ParentagePedigree = {
         'elementId'      : pedigreeChart.element,
         'height'         : 75 * maxDepth,
         'width'          : width,
-        'chartOptions'   : {
-          'nodeLinks'    : function(d) { return d.current.url; },
-        },
         'title'          : '<em>' + stockName + '</em> Parental Pedigree',
         'legend'         : 'The above tree depicts the parentage of <em>' + stockName + '</em>. The type of relationship is indicated both using line styles defined in the legend and also in sentence form when you hover your mouse over the relationship lines. Additional information about each germplasm can be obtained by clicking on the Germplasm name. Furthermore, parts of the pedigree diagram can be collapsed or expanded by double-clicking on a Germplasm node.',
 
