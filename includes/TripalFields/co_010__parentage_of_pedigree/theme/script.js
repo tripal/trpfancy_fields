@@ -67,6 +67,8 @@ Drupal.behaviors.ParentagePedigree = {
         // On load, collapse level from the end leaf down.
         // Levels:
         'collapsedDepth' : pedigreeChart.collapse_level,
+        //
+        'pass'           : Drupal.settings.trpfancyFields.pass,
       });
 
 
