@@ -48,6 +48,13 @@ class co_010__parentage_of_pedigree_formatter extends TripalFieldFormatter {
     $field_name = $this->instance['field_name'];
     $display_vars = $entity->{$field_name}['und'][0]['vars'];
 
+    // Add user login status. This will be used to restrict data.
+    // This is very important to be in in this class and not in the load function
+    // which, at first I tried it in that method.
+    // The problem is it caches the value so that when youre logged in
+    // user_is_looged_in alwasy returns 1.
+    $pass = (user_is_logged_in()) ? 1 : 0;
+
     // Prepare settings:
     drupal_add_js(array('trpfancyFields' => array(
       // Stock name.
@@ -55,10 +62,11 @@ class co_010__parentage_of_pedigree_formatter extends TripalFieldFormatter {
       // JSON url.
       'url'    => $display_vars['source'],
       // Append SVG element and configurations.
-      'chart'  => $display_vars['chart']),
+      'chart'  => $display_vars['chart'],
+      // Authenticate user.
+      'pass'   => $pass),
 
     ), 'setting');
-
 
     // Initialize chart:
     // Load Tripal D3 API.
@@ -72,7 +80,6 @@ class co_010__parentage_of_pedigree_formatter extends TripalFieldFormatter {
         'scope' => 'footer'
       )
     );
-
 
     // Add element:
     $element[0] = array(
