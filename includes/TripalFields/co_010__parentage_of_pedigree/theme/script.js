@@ -40,7 +40,7 @@ Drupal.behaviors.ParentagePedigree = {
       // Set the <table> to occupy the entire pane and use the width as the
       // estimated width of the SVG element.
       $('.ds-right div:visible').find('table').css('width', '100%');
-      width = $('.ds-right div:visible').find('table').innerWidth();
+      width = Math.floor($('.ds-right div:visible').find('table').innerWidth());
 
       if (width == 0) {
         // All else fail, set to 750;
