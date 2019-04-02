@@ -5,6 +5,7 @@
 
 // Includes all non-class field functions.
 include('includes/trpfancy_fields.fields.inc');
+include('includes/TripalFields/data__identifier/data__identifier_widget.inc');
 
 /**
  * Add all terms needed for our fields
