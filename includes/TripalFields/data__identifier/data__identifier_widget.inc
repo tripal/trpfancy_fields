@@ -108,27 +108,30 @@ class data__identifier_widget extends ChadoFieldWidget {
 
         // Pull system variable for configured prefix.
         $prefix = variable_get('trpfancy_field_identifier_prefix');
-        $unique_name = $prefix . ' + ID #';
-        $desciption = 'ID # will be set automatically on creation.';
 
-        // Use this to flag process that user is creating a new record
-        // and quick reference to the field.
-        $form['trpfancy_fields_field_name'] = array(
-          '#type' => 'value',
-          '#value' => $field_name,
-        );
+        if (isset($prefix) && !empty($prefix)) {
+          $unique_name = $prefix . ' + ID #';
+          $desciption = 'ID # will be set automatically on creation.';
 
-        $widget['table'] = array(
-          '#type' => 'value',
-          '#value' => $field_table,
-        );
+          // Use this to flag process that user is creating a new record
+          // and quick reference to the field.
+          $form['trpfancy_fields_field_name'] = array(
+            '#type' => 'value',
+            '#value' => $field_name,
+          );
 
-        $id = uniqid();
-        // What actually gets saved.
-        $widget['value'] = array(
-          '#type' => 'value',
-          '#value' => $id,
-        );
+          $widget['table'] = array(
+            '#type' => 'value',
+            '#value' => $field_table,
+          );
+
+          $id = uniqid();
+          // What actually gets saved.
+          $widget['value'] = array(
+            '#type' => 'value',
+            '#value' => $id,
+          );
+        }
       }
 
       // The value presented to the user via load.
