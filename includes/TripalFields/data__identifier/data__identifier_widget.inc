@@ -85,7 +85,9 @@ class data__identifier_widget extends ChadoFieldWidget {
 
       // When interface to set prefix:
       // Notice for admin where they can alter the prefix use to formulate uniquename.
-      // tripal_set_message('Administrators, you can set prefix used in uniquename field in [link here].', TRIPAL_INFO, array('return_html' => FALSE));
+      // @see hook_menu().
+      $link = l('Update Prefix', 'admin/tripal/extension/trpfancy_fields/prefix');
+      tripal_set_message('Administrators, you can set prefix used in uniquename field in ' . $link . '.', TRIPAL_INFO, array('return_html' => FALSE));
 
       // Dertermine if process is Create or Update. To test: check if chado_record_id
       // were set to an id number.
@@ -109,7 +111,8 @@ class data__identifier_widget extends ChadoFieldWidget {
         $unique_name = $prefix . ' + ID #';
         $desciption = 'ID # will be set automatically on creation.';
 
-        // Use this to flag process that user is creating a new record.
+        // Use this to flag process that user is creating a new record
+        // and quick reference to the field.
         $form['trpfancy_fields_field_name'] = array(
           '#type' => 'value',
           '#value' => $field_name,

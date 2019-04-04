@@ -35,9 +35,10 @@ function trpfancy_fields_add_field_terms() {
 function trpfancy_fields_menu() {
   // ADMISTRATIVE PAGE:
   // A page for changing prefix used to generate uniquename in Identifier field.
+  // NOTE: this variable is used by data__identifier field.
   $items['admin/tripal/extension/trpfancy_fields/prefix'] = array(
     'title'     => 'Configure Data Identifier Prefix',
-    'description' => 'Provides interface for configuring prefix used to auto-generate uniquename/identifier.',
+    'description' => t('Provides interface for configuring prefix used to auto-generate uniquename/identifier.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('trpfancy_fields_config'),
     'access arguments' => array('access administration pages'),
@@ -46,6 +47,7 @@ function trpfancy_fields_menu() {
 
   return $items;
 }
+
 
 /**
  * Function callback:
@@ -56,6 +58,7 @@ function trpfancy_fields_config($form, &$form_state) {
   // NOTE: this variable is used by data__identifier field.
   $cur_prefix = variable_get('trpfancy_field_identifier_prefix');
 
+  // Show an example of the prefix in action.
   $form['preview_prefix'] = array(
     '#type' => 'markup',
     '#markup' => 'Example (Prefix + ID#): <br />
@@ -63,9 +66,10 @@ function trpfancy_fields_config($form, &$form_state) {
       . $cur_prefix . '<span style="color: #666666">' . mt_rand(7777, 9999) . '</span></div>',
   );
 
+  // Prefix field.
   $form['trpfancy_field_identifier_prefix'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Prefix'),
+    '#type'    => 'textfield',
+    '#title'     => t('Prefix'),
     '#description' => t('Prefix used to generate uniquename for Identifier field.'),
     '#default_value' => $cur_prefix,
     '#required' => TRUE,
@@ -75,4 +79,3 @@ function trpfancy_fields_config($form, &$form_state) {
   // no hook_submit nor hook_validate is required.
   return system_settings_form($form);
 }
-
