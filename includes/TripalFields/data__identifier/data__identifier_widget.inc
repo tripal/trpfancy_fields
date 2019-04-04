@@ -91,10 +91,10 @@ class data__identifier_widget extends ChadoFieldWidget {
       // were set to an id number.
       if (isset($element['#entity']->chado_record_id) && $element['#entity']->chado_record_id > 0) {
         // Update here.
-        
+
         $unique_name = array_key_exists($delta, $items) ? $items[$delta]['value'] : '';
         $desciption = '';
-        
+
         // Feed to this field the uniquename for this stock.
         $widget['value'] = array(
           '#type' => 'value',
@@ -103,35 +103,35 @@ class data__identifier_widget extends ChadoFieldWidget {
       }
       else {
         // Create.
-        
+
         // Pull system variable for configured prefix.
         $prefix = variable_get('trpfancy_field_identifier_prefix');
         $unique_name = $prefix . ' + ID #';
         $desciption = 'ID # will be set automatically on creation.';
-        
+
         // Use this to flag process that user is creating a new record.
         $form['trpfancy_fields_field_name'] = array(
           '#type' => 'value',
           '#value' => $field_name,
         );
-        
+
         $widget['table'] = array(
           '#type' => 'value',
           '#value' => $field_table,
         );
-      
+
         $id = uniqid();
         // What actually gets saved.
         $widget['value'] = array(
           '#type' => 'value',
           '#value' => $id,
-        ); 
+        );
       }
-      
+
       // The value presented to the user via load.
       // If $items['delta']['value'] is set then we are updating and already have this
       // information. As such, simply save it again.
-      
+
       // What user sees.
       $widget[$linker_field] = array(
         '#type'   => 'textfield',
@@ -197,26 +197,26 @@ class data__identifier_widget extends ChadoFieldWidget {
    */
   public function submit($form, &$form_state, $entity_type, $entity, $langcode, $delta) {
     // Alter the value of the unique name to the unique id generated.
-    // Once save, this temp uniquename will be used to query back the same record 
+    // Once save, this temp uniquename will be used to query back the same record
     // to the final alteration of the uniquename to contain the primary key.
     if(isset($form_state['values']['trpfancy_fields_field_name'])) {
       // See callback function below.
       $field_name = $this->instance['field_name'];
       $field_table = $this->instance['settings']['chado_table'];
       $linker_field = 'chado-' . $field_table . '__uniquename';
-    
+
       $tmp_uniquename = $form_state['values'][$field_name]['und'][0]['value'];
-    
-      $prefix = variable_get('trpfancy_field_identifier_prefix');   
+
+      $prefix = variable_get('trpfancy_field_identifier_prefix');
       $form_state['values'][$field_name][$langcode][$delta][$linker_field] = $prefix . $tmp_uniquename;
     }
-    
+
     parent::submit($form, $form_state, $entity_type, $entity, $langcode, $delta);
   }
 }
 
   /**
-   * Function callback: 
+   * Function callback:
    * This function gets executed after submit() above and performs
    * the final alteration to the uniquename.
    */
@@ -224,26 +224,26 @@ class data__identifier_widget extends ChadoFieldWidget {
     // Apply this hook only to field of type Tripal Entity
     // and the data array contains the data_identifier field.
     if ($type == 'TripalEntity' && isset($entity->trpfancy_fields_field_name)) {
-      $f = $entity->trpfancy_fields_field_name; 
+      $f = $entity->trpfancy_fields_field_name;
       $arr = $entity->$f;
       $data = $arr['und'][0];
-      
+
       $tmp_uniquename = $data['value'];
       $prefix = variable_get('trpfancy_field_identifier_prefix');
-    
+
       // Find the primary key of the table this uniquename is attached to.
       $pk = chado_query("SELECT column_name FROM information_schema.COLUMNS WHERE TABLE_NAME = :table",
         array(':table' => $data['table']))
-        ->fetchField(); 
-    
+        ->fetchField();
+
       $sql = sprintf("SELECT %s FROM {%s} WHERE uniquename = :uniquename LIMIT 1", $pk, $data['table']);
       $id = chado_query($sql, array(':uniquename' => $prefix . $tmp_uniquename))
         ->fetchField();
-    
+
       if ($id) {
         // New id.
         $new_uniquename = $prefix . $id;
-    
+
         chado_update_record($data['table'],
           array('uniquename' => $prefix . $tmp_uniquename),
           array('uniquename' => $new_uniquename)

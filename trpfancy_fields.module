@@ -27,3 +27,52 @@ function trpfancy_fields_add_field_terms() {
     tripal_insert_cvterm($term);
   }
 }
+
+
+/**
+ * Implements hook_menu().
+ */
+function trpfancy_fields_menu() {
+  // ADMISTRATIVE PAGE:
+  // A page for changing prefix used to generate uniquename in Identifier field.
+  $items['admin/tripal/extension/trpfancy_fields/prefix'] = array(
+    'title'     => 'Configure Data Identifier Prefix',
+    'description' => 'Provides interface for configuring prefix used to auto-generate uniquename/identifier.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('trpfancy_fields_config'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Function callback:
+ * Construct form interface to update prefix configuration.
+ */
+function trpfancy_fields_config($form, &$form_state) {
+  // System variable used to store prefix value:
+  // NOTE: this variable is used by data__identifier field.
+  $cur_prefix = variable_get('trpfancy_field_identifier_prefix');
+
+  $form['preview_prefix'] = array(
+    '#type' => 'markup',
+    '#markup' => 'Example (Prefix + ID#): <br />
+      <div style="font-family: courier, serif; font-size: 2em; margin: 5px 0 20px 0; border: 1px solid #CCCCCC; padding: 10px; display: inline-block;">'
+      . $cur_prefix . '<span style="color: #666666">' . mt_rand(7777, 9999) . '</span></div>',
+  );
+
+  $form['trpfancy_field_identifier_prefix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Prefix'),
+    '#description' => t('Prefix used to generate uniquename for Identifier field.'),
+    '#default_value' => $cur_prefix,
+    '#required' => TRUE,
+  );
+
+  // This will add a save button to this form, thus
+  // no hook_submit nor hook_validate is required.
+  return system_settings_form($form);
+}
+
