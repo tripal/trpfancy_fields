@@ -143,7 +143,7 @@ class data__identifier_widget extends ChadoFieldWidget {
         '#type'   => 'textfield',
         '#title'   => 'Uniquename',
         '#value'    => $unique_name,
-        //'#disabled'  => TRUE,
+        '#disabled'  => TRUE,
         '#description' => $desciption,
       );
     }
