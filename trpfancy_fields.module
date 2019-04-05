@@ -36,7 +36,7 @@ function trpfancy_fields_menu() {
   // Menu home.
   $items['admin/tripal/extension/trpfancyfields'] = array(
     'title' => 'Tripal Fancy Fields Configuration',
-    'description' => 'Configure Tripal Fancy Fields.',
+    'description' => 'Tripal Fancy Fields.',
     'access arguments' => array('administer tripal'),
   );
   
