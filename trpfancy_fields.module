@@ -33,16 +33,24 @@ function trpfancy_fields_add_field_terms() {
  * Implements hook_menu().
  */
 function trpfancy_fields_menu() {
+  // Menu home.
+  $items['admin/tripal/extension/trpfancyfields'] = array(
+    'title' => 'Tripal Fancy Fields Configuration',
+    'description' => 'Configure Tripal Fancy Fields.',
+    'access arguments' => array('administer tripal'),
+  );
+  
   // ADMISTRATIVE PAGE:
   // A page for changing prefix used to generate uniquename in Identifier field.
   // NOTE: this variable is used by data__identifier field.
-  $items['admin/tripal/extension/trpfancy_fields/prefix'] = array(
+  $items['admin/tripal/extension/trpfancyfields/prefix'] = array(
     'title'     => 'Configure Data Identifier Prefix',
     'description' => t('Provides interface for configuring prefix used to auto-generate uniquename/identifier.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('trpfancy_fields_config'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer tripal'),
     'type' => MENU_NORMAL_ITEM,
+    'weight' => 1,
   );
 
   return $items;

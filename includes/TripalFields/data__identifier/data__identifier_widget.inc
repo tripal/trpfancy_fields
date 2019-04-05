@@ -89,25 +89,25 @@ class data__identifier_widget extends ChadoFieldWidget {
       $link = l('Update Prefix', 'admin/tripal/extension/trpfancy_fields/prefix');
       tripal_set_message('Administrators, you can set prefix used in uniquename field in ' . $link . '.', TRIPAL_INFO, array('return_html' => FALSE));
 
+      // Pull system variable for configured prefix.
+      $prefix = variable_get('trpfancy_field_identifier_prefix');
+
       // Dertermine if process is Create or Update. To test: check if chado_record_id
       // were set to an id number.
       if (isset($element['#entity']->chado_record_id) && $element['#entity']->chado_record_id > 0) {
         // Update here.
 
-        $unique_name = array_key_exists($delta, $items) ? $items[$delta]['value'] : '';
+        $unique_name = $prefix . $element['#entity']->chado_record_id;
         $desciption = '';
 
         // Feed to this field the uniquename for this stock.
         $widget['value'] = array(
           '#type' => 'value',
-          '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
+          '#value' => $unique_name,
         );
       }
       else {
         // Create.
-
-        // Pull system variable for configured prefix.
-        $prefix = variable_get('trpfancy_field_identifier_prefix');
 
         if (isset($prefix) && !empty($prefix)) {
           $unique_name = $prefix . ' + ID #';
@@ -149,7 +149,7 @@ class data__identifier_widget extends ChadoFieldWidget {
     }
     else {
       // Text field but not identifier.
-      drupal_set_message('This option is available only to Identifier (text field).', 'error');
+      drupal_set_message('This option is available only to Identifier (text field). Please restore field <em>' . $element['#title'] . '</em> to Text type.', 'error');
       tripal_set_message('Administrators, please ensure that you are adding this autocomplete uniquename field only to Identifier field.', TRIPAL_INFO, array('return_html' => FALSE));
     }
   }
