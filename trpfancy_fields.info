@@ -5,6 +5,9 @@ package = Tripal Extensions
 dependencies[] = tripal
 dependencies[] = tripald3
 
+stylesheets[all][] = theme/css/trpfancy_fields.css
+
 files[] = includes/TripalFields/ChadoChartField.inc
 files[] = includes/TripalFields/ChadoChartFormatter.inc
 files[] = includes/TripalFields/local__single_series_chart/local__single_series_chart.inc
+files[] = includes/TripalFields/local__gbrowse_image/local__gbrowse_image.inc
