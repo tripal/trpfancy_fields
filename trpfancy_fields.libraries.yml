@@ -1,0 +1,9 @@
+# @file
+# Tripal Fancy Fields libraries.
+
+# Library used in field configurations.
+tripal-fancyfields-config:
+  version: 1.x
+  css:
+    theme:
+      css/tripal-fancyfields-config.css: {}

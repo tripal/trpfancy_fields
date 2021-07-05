@@ -1,0 +1,7 @@
+# @file
+# Tripal Fancy Fields module variables/configuration.
+
+# FIELD IDENTIFIER CONFIGURATIONS:
+tripal_fancyfields_identifier_config:
+  prefix: 'KP:GERM'
+  

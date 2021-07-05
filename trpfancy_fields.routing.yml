@@ -1,0 +1,25 @@
+# @file
+# Tripal Fancy Fields routes definition.
+
+
+# Configure Fields Route (currently - configure data identifier prefix).
+# Main switchboard to field with configuration interface.
+tripal_fancyfields.configure:
+  path: 'admin/tripal/extension/trpfancyfields/configure'
+  defaults:
+    _title: 'Tripal Fancy Fields - Configure Fields'
+    _controller: '\Drupal\trpfancy_fields\Controller\TripalFancyFieldsConfigureController::ui'
+  requirements:
+    _permission: 'administer tripal'
+
+
+# Routes below are used to reference forms for each field configuration.
+
+# Configure data identifier prefix).
+tripal_fancyfields.configure_data_id:
+  path: 'admin/tripal/extension/trpfancyfields/configure/data_id'
+  defaults:
+    _title: 'Tripal Fancy Fields - Configure Fields: Data Identifier Prefix'
+    _form: '\Drupal\trpfancy_fields\Form\TripalFancyFieldsDataIdForm'
+  requirements:
+    _permission: 'administer tripal'

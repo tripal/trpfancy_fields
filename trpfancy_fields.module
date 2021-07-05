@@ -1,89 +1,34 @@
 <?php
 /**
  * @file
+ * .module file of Tripal Fancy Fields.
  */
 
-// Includes all non-class field functions.
-include('includes/trpfancy_fields.fields.inc');
-include('includes/TripalFields/data__identifier/data__identifier_widget.inc');
+use Drupal\Core\Url;
 
 /**
- * Add all terms needed for our fields
- * @todo move this into an install file.
+ * Implements hook_theme().
+ * Used by Tripal Fancy Fields Configure Fields.
+ *
+ * @see templates in /templates
  */
-function trpfancy_fields_add_field_terms() {
-
-  $terms = array(
-    array(
-      'cv_name' => 'local',
-      'id' => 'local:quick_search',
-      'name' => 'Quick Search',
-      'definition' => 'Provide a quick search on entity pages which submits/redirects to a full search.',
-    ),
-  );
-
-  // Now add each term.
-  foreach ($terms as $term) {
-    tripal_insert_cvterm($term);
-  }
-}
-
-
-/**
- * Implements hook_menu().
- */
-function trpfancy_fields_menu() {
-  // Menu home.
-  $items['admin/tripal/extension/trpfancyfields'] = array(
-    'title' => 'Tripal Fancy Fields',
-    'description' => 'Tripal Fancy Fields.',
-    'access arguments' => array('administer tripal'),
-  );
+function trpfancy_fields_theme($existing, $type, $theme, $path) {
+  $context_links = [
+    'configure_dataid' => ['form' => 'tripal_fancyfields.configure_data_id']
+  ];
   
-  // ADMISTRATIVE PAGE:
-  // A page for changing prefix used to generate uniquename in Identifier field.
-  // NOTE: this variable is used by data__identifier field.
-  $items['admin/tripal/extension/trpfancyfields/prefix'] = array(
-    'title'     => 'Configure Data Identifier Prefix',
-    'description' => t('Provides interface for configuring prefix used to auto-generate uniquename/identifier.'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('trpfancy_fields_config'),
-    'access arguments' => array('administer tripal'),
-    'type' => MENU_NORMAL_ITEM,
-    'weight' => 1,
-  );
+  $link = Url::fromRoute($context_links['configure_dataid']['form']);
+  $links_ui[ 'configure_dataid' ] = \Drupal::l(t('Configure'), $link);
 
-  return $items;
-}
+  $variables = [
+    // Tripal Fancy Fields Configure Fields Page.
+    'theme-tripal-fancyfields-configure' => [
+      'variables' => [
+        'context_links' => $links_ui
+      ],
+      'template'  => 'template-tripal-fancyfields-configure',
+    ],
+  ];
 
-
-/**
- * Function callback:
- * Construct form interface to update prefix configuration.
- */
-function trpfancy_fields_config($form, &$form_state) {
-  // System variable used to store prefix value:
-  // NOTE: this variable is used by data__identifier field.
-  $cur_prefix = variable_get('trpfancy_field_identifier_prefix');
-
-  // Show an example of the prefix in action.
-  $form['preview_prefix'] = array(
-    '#type' => 'markup',
-    '#markup' => 'Example (Prefix + ID#): <br />
-      <div style="font-family: courier, serif; font-size: 2em; margin: 5px 0 20px 0; border: 1px solid #CCCCCC; padding: 10px; display: inline-block;">'
-      . $cur_prefix . '<span style="color: #666666">' . mt_rand(7777, 9999) . '</span></div>',
-  );
-
-  // Prefix field.
-  $form['trpfancy_field_identifier_prefix'] = array(
-    '#type'    => 'textfield',
-    '#title'     => t('Prefix'),
-    '#description' => t('Prefix used to generate uniquename for Identifier field.'),
-    '#default_value' => $cur_prefix,
-    '#required' => TRUE,
-  );
-
-  // This will add a save button to this form, thus
-  // no hook_submit nor hook_validate is required.
-  return system_settings_form($form);
+  return $variables;
 }

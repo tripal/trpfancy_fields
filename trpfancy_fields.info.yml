@@ -1,0 +1,11 @@
+name: 'Tripal Fancy Fields'
+description: 'Provides additional fields to jazz up your Tripal Content Pages'
+package: 'Tripal Extensions'
+
+type: module
+core: 8.x
+configure: tripal_blast.configure
+
+dependencies:
+  - tripal:tripal
+  - tripald3:tripald3
