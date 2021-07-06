@@ -216,7 +216,8 @@ class data__identifier_widget extends ChadoFieldWidget {
 
       $tmp_uniquename = $form_state['values'][$field_name]['und'][0]['value'];
 
-      $prefix = variable_get('trpfancy_field_identifier_prefix');
+      $prefix = \Drupal::config('trpfancy_fields.settings')
+        ->get('tripal_fancyfields_identifier_config.prefix');
       $form_state['values'][$field_name][$langcode][$delta][$linker_field] = $prefix . $tmp_uniquename;
     }
 

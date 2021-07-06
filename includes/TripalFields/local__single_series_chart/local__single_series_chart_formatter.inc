@@ -226,7 +226,7 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
         '#title' => $caption,
         '#header' => $header,
         '#rows' => $rows,
-        '#empty' => t('0 Recent Jobs'),
+        '#empty' => t('0 Items in this table'),
         '#attributes' => [
           'class' => ['tripald3-chart', $settings['table_type']],
         ]
