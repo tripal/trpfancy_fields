@@ -31,7 +31,7 @@ class local__quick_browse extends TripalField {
   // Drupal will automatically change these settings for all fields.
   // Once instances exist for a field type then these settings cannot be
   // changed.
-  public static $default_settings = array(
+  public static $default_settings = [
     'storage' => 'tripal_no_storage',
     // It is expected that all fields set a 'value' in the load() function.
     // In many cases, the value may be an associative array of key/value pairs.
@@ -39,8 +39,8 @@ class local__quick_browse extends TripalField {
     // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
     // function that are supported by the query() function should be
     // listed here.
-    'browseable_keys' => array(),
-  );
+    'browseable_keys' => [],
+  ];
 
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -49,7 +49,7 @@ class local__quick_browse extends TripalField {
   // If you override this variable in a child class be sure to replicate the
   // term_name, term_vocab, term_accession and term_fixed keys as these are
   // required for all TripalFields.
-  public static $default_instance_settings = array(
+  public static $default_instance_settings = [
     // The short name for the vocabulary (e.g. schema, SO, GO, PATO, etc.).
     'term_vocabulary' => 'local',
     // The name of the term.
@@ -71,7 +71,7 @@ class local__quick_browse extends TripalField {
     'option_storage' => 'trpfancy_browse_options',
     // A list of browser types this field intends to provide.
     'browser_types' => '',
-  );
+  ];
 
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
@@ -125,7 +125,8 @@ class local__quick_browse extends TripalField {
     //    when options are global to all entities for the given field.
     if ($settings['option_storage'] == 'trpfancy_browse_options') {
       $query = 'SELECT * FROM {trpfancy_browse_options} WHERE instance_id=:id';
-      $results = db_query($query, array(':id' => $instance_id));
+      $results = chado_query($query, [':id' => $instance_id]);
+
       foreach($results as $opt) {
         $entity->{$field_name}['und'][0]['value'][$opt->category][$opt->key] = $opt->value;
       }
@@ -168,22 +169,22 @@ class local__quick_browse extends TripalField {
 
     // Simple radio buttons to select whether you want your options
     // per entity or constant for this field.
-    $element['option_storage'] = array(
+    $element['option_storage'] = [
       '#type' => 'radios',
       '#title' => 'Browser Option Source',
-      '#options' => array(
+      '#options' => [
         'trpfancy_browse_options' => 'A. Constant for this Field',
         'trpfancy_browse_options_per_entity' => 'B. Dependant on the page shown',
-      ),
+      ],
       '#default_value' => $settings['option_storage'],
       '#required' => TRUE,
       '#description' => 'The browser field breaks down a set of options by
         "Browser Type". Depending on your choice here, the options can be a) constant
         for the field (e.g. same options for all organisms) or they can be
         b) specific to the page being shown (e.g. Specific to a given organism).',
-    );
+    ];
 
-    $element['browser_types'] = array(
+    $element['browser_types'] = [
       '#type' => 'textarea',
       '#title' => 'Browser Types',
       '#required' => TRUE,
@@ -195,12 +196,11 @@ class local__quick_browse extends TripalField {
         <strong>Each Browser Type should be indicated on a seperate line using the
         key=value format.</strong>',
       '#default_value' => $settings['browser_types'],
-    );
+    ];
 
-    $element['options'] = array(
-      '#type' => 'item',
-      '#title' => 'Options',
-      '#markup' => '<p>Currently there is no UI for setting the option for a given browser type.
+    $element['options'] = [
+      '#type' => 'inline_template',
+      '#template' => '<h1>Options</h1><p>Currently there is no UI for setting the option for a given browser type.
         Instead it is recommended you add them to the database manually either via "psql" or "drush sql-query".</p>
         <p>For example, the following query would insert 3 options for the browser type with
         the key="type1". The browse field would create 3 links: "Exome Capture", "Genotype-by-Sequencing",
@@ -227,30 +227,39 @@ class local__quick_browse extends TripalField {
               (5, '.$this->instance['id'].', "type1", "4567", "SCAR");
         </pre>
         <br />',
-    );
+    ];
 
 
     // Show the user what options they have already set.
     $results = db_query('SELECT * FROM {trpfancy_browse_options} WHERE instance_id=:id ORDER BY category ASC, value ASC',
-	array(':id' => $this->instance['id']));
-    $rows = array();
+	  [':id' => $this->instance['id']]);
+    $rows = [];
     foreach($results as $r) {
-      $rows[] = array(
+      $rows[] = [
         $r->category,
         $r->key,
         $r->value
-      );
+      ];
     }
+   
     if ($rows) {
-      $element['options']['#markup'] .= '<p><strong>Current Options</strong>: This table shows the default options you have for this field stored in trpfancy_browse_options.</p>';
-      $element['options']['#markup'] .= theme_table(array(
-        'header' => array('Browser Type', 'Key', 'Value'),
-        'rows' => $rows,
-        'attributes' => array(),
-      ));
+      $element['options'] = [
+        '#type' => 'table',
+        '#header' => ['Browser Type', 'Key', 'Value'],
+        '#rows' => $rows,
+        '#empty' => t('0 Items in this table'),
+      ];
+
+      $element['options_markup'] = [
+        '#type' => 'inline_template',
+        '#template' => '<p><strong>Current Options</strong>: This table shows the default options you have for this field stored in trpfancy_browse_options.</p>'
+      ];
     }
     else {
-      $element['options']['#markup'] .= '<p><strong>Current Options</strong>: You have no default options available for this field (instance_id: '.$this->instance['id'].'). Once you add them to the database following the instructions above, you will see them listed here.</p>';
+      $element['options_markup'] = [
+        '#type' => 'inline_template',
+        '#template' => '<p><strong>Current Options</strong>: You have no default options available for this field (instance_id: '.$this->instance['id'].'). Once you add them to the database following the instructions above, you will see them listed here.</p>'
+      ];
     }
 
     return $element;
@@ -266,7 +275,7 @@ class local__quick_browse extends TripalField {
  *   An array of browser types where key: machine name, value: human-readable name.
  */
 function local__quick_browse_get_browser_types($instance_settings) {
-  $types = array();
+  $types = [];
 
   $lines = explode("\n", $instance_settings['browser_types']);
   foreach ($lines as $line) {
@@ -274,7 +283,7 @@ function local__quick_browse_get_browser_types($instance_settings) {
     $line = trim($line);
 
     // Extract the key and value to add to the types list.
-    $matches = array();
+    $matches = [];
     if (preg_match('/^(\w+)=(\w+)$/', $line, $matches)) {
       $types[$matches[1]] = $matches[2];
     }

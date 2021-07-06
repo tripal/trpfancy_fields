@@ -2,6 +2,7 @@
  * @file
  * Manage parentage pedigree behavior
  */
+
 (function ($) {
 Drupal.behaviors.ParentagePedigree = {
   attach: function(context, settings) {
@@ -70,7 +71,6 @@ Drupal.behaviors.ParentagePedigree = {
         //
         'pass'           : Drupal.settings.trpfancyFields.pass,
       });
-
 
       $('#tripald3-pedigree-wait').remove();
     });

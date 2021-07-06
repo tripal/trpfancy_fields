@@ -30,7 +30,7 @@ class co_010__parentage_of_pedigree extends TripalField {
   // Drupal will automatically change these settings for all fields.
   // Once instances exist for a field type then these settings cannot be
   // changed.
-  public static $default_settings = array(
+  public static $default_settings = [
     'storage' => 'tripal_no_storage',
     // It is expected that all fields set a 'value' in the load() function.
     // In many cases, the value may be an associative array of key/value pairs.
@@ -38,8 +38,8 @@ class co_010__parentage_of_pedigree extends TripalField {
     // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
     // function that are supported by the query() function should be
     // listed here.
-    'browseable_keys' => array(),
-  );
+    'browseable_keys' => [],
+  ];
 
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -48,7 +48,7 @@ class co_010__parentage_of_pedigree extends TripalField {
   // If you override this variable in a child class be sure to replicate the
   // term_name, term_vocab, term_accession and term_fixed keys as these are
   // required for all TripalFields.
-  public static $default_instance_settings = array(
+  public static $default_instance_settings = [
     // The short name for the vocabulary (e.g. schema, SO, GO, PATO, etc.).
     'term_vocabulary' => 'CO_010',
     // The name of the term.
@@ -70,7 +70,7 @@ class co_010__parentage_of_pedigree extends TripalField {
     'option_storage' => '',
     // A list of browser types this field intends to provide.
     'browser_types' => '',
-  );
+  ];
 
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
@@ -107,8 +107,6 @@ class co_010__parentage_of_pedigree extends TripalField {
    *   The array may contain as many other keys at the same level as 'value'
    *   but those keys are for internal field use and are not considered the
    *   value of the field.
-   *
-   *
    */
   public function load($entity) {
     // The record.
@@ -122,7 +120,7 @@ class co_010__parentage_of_pedigree extends TripalField {
 
 
     // Chart configuration:
-    $chart = array(
+    $chart = [
       // Whether to put figure key legend or not.
       // TRUE of FALSE;
       'draw_key_legend' => TRUE,
@@ -138,18 +136,18 @@ class co_010__parentage_of_pedigree extends TripalField {
       'wrapper' => 'tripald3-pedigree-wrapper',
       // Append svg to.
       'element' => 'tripald3-pedigree'
-    );
+    ];
 
 
     // Data:
-    $data = array(
+    $data = [
       'name' => $entity->title,
-    );
+    ];
 
 
     // Source:
     $path_base     = $GLOBALS['base_url'];
-    $path_to_module = drupal_get_path('module', 'trpfancy_fields');
+    $path_to_module = \Drupal::service('extension.list.module')->getPath('trpfancy_fields');
     $path_to_tfield  = $path_base . '/' . $path_to_module . '/includes/TripalFields';
     $path_to_pedigree = $path_to_tfield . '/' . get_class($this);
     $path_to_JSON      = $path_base . '/ajax/tripal/d3-json/relationships/stock/' . $chado_record_id;
@@ -158,19 +156,17 @@ class co_010__parentage_of_pedigree extends TripalField {
     $stock_type = $entity->chado_record->type_id->name;
     $path_to_germpage   = $path_base . '/' . strtolower($stock_type) . '/';
 
-    $source = array(
+    $source = [
       'path_JSON' => $path_to_JSON,
       'path_T3field' => $path_to_pedigree,
       'path_germpage'  => $path_to_germpage,
-    );
+    ];
 
-
-
-    $entity->{$field_name}['und'][0]['vars'] = array(
+    $entity->{$field_name}['und'][0]['vars'] = [
       'chart'  => $chart,
       'data'   => $data,
       'source' => $source,
-    );
+    ];
   }
 
   /**
