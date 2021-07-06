@@ -157,6 +157,20 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
       // STYLE
       $element['#attached']['library'][] = 'tripald3/style-tripald3';
 
+      // SETTINGS 
+      // Color scheme configuration.
+      $default_scheme = \Drupal::service('tripald3.TripalD3ColorScheme')
+        ->registerColorScheme();
+      $to_Drupalsettings['tripalD3']['vars']['colorScheme'] = $default_scheme; 
+
+      // Auto resize configuration.        
+      $default_resize = $this->config('tripald3.settings')
+        ->get('tripald3_autoResize');
+      $to_Drupalsettings['tripalD3']['vars']['autoResize']  = $default_resize;
+      
+      $element['#attached']['drupalSettings'] = $to_Drupalsettings;
+
+
       // Defaults based on table type.
       //  -- Info.
       if ($settings['table_type'] == 'info') {
