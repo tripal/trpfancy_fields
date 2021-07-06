@@ -7,3 +7,10 @@ tripal-fancyfields-config:
   css:
     theme:
       css/tripal-fancyfields-config.css: {}
+
+# co_010 Field library.
+tripal-fancyfields-co-010:
+  version: 1.x
+  js:
+    theme:
+      includes/TripalFields/co_010__parentage_of_pedigree/theme/js/script.js: {}
