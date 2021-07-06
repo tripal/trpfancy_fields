@@ -133,9 +133,7 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
 
     if (isset($items[0]) && !empty($items[0]['value'])) {
 
-      // Load the Tripal D3 API
-      tripald3_load_libraries();
-      
+      // Load the Tripal D3 Libraries.      
       $element['#attached']['library'][] = 'tripald3/D3';
       $element['#attached']['library'][] = 'tripald3/D3';
       
