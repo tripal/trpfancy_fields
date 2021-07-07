@@ -6,14 +6,14 @@
  *   to Tripal Content pages.
  *
  * Display:
- *   Draws a bar chart using D3.js
+ *   Draws a donut chart using D3.js
  * Configuration:
  *   None yet available.
  */
-class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
+class local__single_series_donut_chart_formatter extends ChadoChartFormatter {
 
   // The default lable for this field.
-  public static $default_label = 'Single-Series Bar Chart';
+  public static $default_label = 'Single-Series Donut Chart';
 
   // The list of field types for which this formatter is appropriate.
   public static $field_types = ['local__single_series_chart'];
@@ -112,7 +112,7 @@ class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
           '#tag' => 'script',
           '#attributes' => ['type' => 'text/javascript'],
           '#value' => '
-            Drupal.behaviors.'.$field_name.' = {
+             Drupal.behaviors.'.$field_name.' = {
               attach: function (context, settings) {
 
                 // Pull the data out of the javascript settings.
@@ -122,7 +122,7 @@ class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
                 tripalD3.drawFigure(
                   data,
                   {
-                    "chartType" : "simplebar",
+                    "chartType" : "simpledonut",
                     "elementId": "trpfancy-'.$field_name.'",
                     "height": 250,
                     "width": 500,
@@ -132,7 +132,7 @@ class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
                   }
                 );
               }
-            };'
+            };',
         ],
       ];
 
@@ -141,7 +141,7 @@ class local__single_series_bar_chart_formatter extends ChadoChartFormatter {
         '#type' => 'inline_template',
         '#template' => '
           <div id="trpfancy-'.$field_name.'">
-            <!-- JS should draw the bar chart here -->
+            <!-- JS should draw the donut chart here -->
           </div>',
       ];
     }
