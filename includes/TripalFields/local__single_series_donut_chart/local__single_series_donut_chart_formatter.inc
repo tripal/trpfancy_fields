@@ -16,7 +16,7 @@ class local__single_series_donut_chart_formatter extends ChadoChartFormatter {
   public static $default_label = 'Single-Series Donut Chart';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__single_series_chart');
+  public static $field_types = ['local__single_series_chart'];
 
   /**
    *  Provides the display for a field
@@ -59,56 +59,91 @@ class local__single_series_donut_chart_formatter extends ChadoChartFormatter {
     if (!empty($items[0]['value'])) {
 
       // Process items to expose to JS.
-      $data = array();
+      $data = [];
       foreach ($items as $key => $value) {
         foreach ($value['value']['hydra:member'] as $part) {
-          $data[] = array(
+          $data[] = [
             'label' => $part['rdfs:label'],
             'count' => $part['local:count'],
-          );
+          ];
         }
       }
 
-      // Expose the data & settings to JS.
-      drupal_add_js(array('trpfancyFields' => array($field_name => $data)), 'setting');
+      // Load the Tripal D3 Libraries.      
+      $element['#attached']['library'][] = 'tripald3/D3';
+      $element['#attached']['library'][] = 'tripald3/D3';
+      
+      // CORE
+      $element['#attached']['library'][] = 'tripald3/D3';
+      $element['#attached']['library'][] = 'tripald3/tripalD3';
+      
+      // CHARTS
+      // Pie
+      $element['#attached']['library'][] = 'tripald3/lib-pie';
+      $element['#attached']['library'][] = 'tripald3/lib-bar';
+      'tripald3/lib-pedigree',
+      
+      // CREATE
+      $element['#attached']['library'][] = 'tripald3/create-multidonut';
+      $element['#attached']['library'][] = 'tripald3/create-pie';
+      $element['#attached']['library'][] = 'tripald3/create-multiseriesdonut';
+      $element['#attached']['library'][] = 'tripald3/create-bar';
+      $element['#attached']['library'][] = 'tripald3/create-pedigree';
 
-      // Load the Tripal D3 API
-      tripald3_load_libraries();
+      // STYLE
+      $element['#attached']['library'][] = 'tripald3/style-tripald3';
 
-      drupal_add_js('
-        Drupal.behaviors.'.$field_name.' = {
-          attach: function (context, settings) {
+      // SETTINGS 
+      // Color scheme configuration.
+      $default_scheme = \Drupal::service('tripald3.TripalD3ColorScheme')
+        ->registerColorScheme();
+      $to_Drupalsettings['tripalD3']['vars']['colorScheme'] = $default_scheme; 
 
-            // Pull the data out of the javascript settings.
-            var data = Drupal.settings.trpfancyFields.'.$field_name.';
+      // Auto resize configuration.        
+      $default_resize = $this->config('tripald3.settings')
+        ->get('tripald3_autoResize');
+      $to_Drupalsettings['tripalD3']['vars']['autoResize']  = $default_resize;
+      $to_Drupalsettings['trpfancyFields'][ $field_name ] = $data;
 
-            // Draw your chart.
-            tripalD3.drawFigure(
-              data,
-              {
-                "chartType" : "simpledonut",
-                "elementId": "trpfancy-'.$field_name.'",
-                "height": 250,
-                "width": 500,
-                "keyPosition": "right",
-                "title": "' . $settings['title'] . '",
-                "legend": "' . $settings['legend'] . '",
+      $element['#attached']['drupalSettings'] = $to_Drupalsettings;
+
+      $element['#attached']['html_head'][] = [
+        [      
+          '#tag' => 'script',
+          '#attributes' => ['type' => 'text/javascript'],
+          '#value' => '
+             Drupal.behaviors.'.$field_name.' = {
+              attach: function (context, settings) {
+
+                // Pull the data out of the javascript settings.
+                var data = drupalSettings.trpfancyFields.'.$field_name.';
+
+                // Draw your chart.
+                tripalD3.drawFigure(
+                  data,
+                  {
+                    "chartType" : "simpledonut",
+                    "elementId": "trpfancy-'.$field_name.'",
+                    "height": 250,
+                    "width": 500,
+                    "keyPosition": "right",
+                    "title": "' . $settings['title'] . '",
+                    "legend": "' . $settings['legend'] . '",
+                  }
+                );
               }
-            );
-          }
-        };',
-        array('type' => 'inline')
-      );
+            };',
+        ],
+      ];
 
       // Finally, add the markup.
-      $element[0] = array(
-        '#type' => 'markup',
-        '#markup' => '
+      $element[0] = [
+        '#type' => 'inline_template',
+        '#template' => '
           <div id="trpfancy-'.$field_name.'">
             <!-- JS should draw the donut chart here -->
           </div>',
-      );
-
+      ];
     }
   }
 }

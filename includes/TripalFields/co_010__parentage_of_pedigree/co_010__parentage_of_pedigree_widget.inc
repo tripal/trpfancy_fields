@@ -13,7 +13,7 @@ class co_010__parentage_of_pedigree_widget extends TripalFieldWidget {
   public static $default_label = 'No Edits';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('co_010__parentage_of_pedigree');
+  public static $field_types = ['co_010__parentage_of_pedigree'];
 
   /**
    * Provides the form for editing of this field.

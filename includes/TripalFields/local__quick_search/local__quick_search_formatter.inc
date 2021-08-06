@@ -17,9 +17,9 @@ class local__quick_search_formatter extends TripalFieldFormatter {
   // The default label for this field.
   public static $default_label = 'Simple Quick Search';
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__quick_search');
+  public static $field_types = ['local__quick_search'];
   // The list of default settings for this formatter.
-  public static $default_settings = array(
+  public static $default_settings = [
     'path' => '',
     'key' => 'value',
     'help_text' => 'Enter your search terms below. On submit, a new page will be opened where additional search criteria are available.',
@@ -27,7 +27,7 @@ class local__quick_search_formatter extends TripalFieldFormatter {
     'button_text' => 'Search',
     'autocomplete_path' => '',
     'filter_qstring' => '',
-  );
+  ];
 
   /**
    * Provides the field's setting form.
@@ -68,68 +68,70 @@ class local__quick_search_formatter extends TripalFieldFormatter {
 
     // Retrieve the current settings not handled by our parent.
     $settings = $this->instance['display'][$view_mode]['settings'];
-    $our_setting_keys = array('path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path', 'filter_qstring');
+    $our_setting_keys = ['path', 'key', 'help_text', 'placeholder', 'button_text', 'autocomplete_path', 'filter_qstring'];
     foreach ($our_setting_keys as $k) {
-      if (!isset($settings[$k])) { $settings[$k] = self::$default_settings[$k]; }
+      if (!isset($settings[$k])) { 
+        $settings[$k] = self::$default_settings[$k]; 
+      }
     }
 
     // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
-    $element['msg'] = array(
-      '#type' => 'markup',
-      '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
-    );
+    $element['msg'] = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
+    ];
 
-    $element['path'] = array(
+    $element['path'] = [
       '#type' => 'textfield',
       '#title' => 'Search Path',
       '#required' => TRUE,
       '#description' => 'This is the relative path of the search page you would like to redirect the user to.',
       '#default_value' => $settings['path'],
-    );
+    ];
 
-    $element['key'] = array(
+    $element['key'] = [
       '#type' => 'textfield',
       '#title' => 'Query Parameter Key',
       '#required' => TRUE,
       '#description' => 'This key is used in the query parameters to tell your full search which filter to apply the value to.',
       '#default_value' => $settings['key'],
-    );
+    ];
 
-    $element['button_text'] = array(
+    $element['button_text'] = [
       '#type' => 'textfield',
       '#title' => 'Button Text',
       '#required' => TRUE,
       '#description' => 'The text on the search button.',
       '#default_value' => $settings['button_text'],
-    );
+    ];
 
-    $element['placeholder'] = array(
+    $element['placeholder'] = [
       '#type' => 'textfield',
       '#title' => 'Placeholder Text',
       '#description' => 'This will appear greyed out within the search textfield and should be used to tell your user the kinds of values they can enter.',
       '#default_value' => $settings['placeholder'],
-    );
+    ];
 
-    $element['autocomplete_path'] = array(
+    $element['autocomplete_path'] = [
       '#type' => 'textfield',
       '#title' => 'Autocomplete Path',
       '#description' => 'The path the AJAX autocomplete script uses as the source for autocompletion.',
       '#default_value' => $settings['autocomplete_path'],
-    );
+    ];
 
-    $element['help_text'] = array(
+    $element['help_text'] = [
       '#type' => 'textarea',
       '#title' => 'Help Text',
       '#description' => 'Guidance to your users for how to use the quick search form.',
       '#default_value' => $settings['help_text'],
-    );
+    ];
 
-    $element['filter_qstring'] = array(
+    $element['filter_qstring'] = [
       '#type' => 'textarea',
       '#title' => 'Additional Filter Criteria',
       '#description' => 'Use this field to add additional filter criteria to the URL query string upon submimt. Each additional criteria should be indicated on a seperate line using the key=value format. Tokens of the format `[field machine name]` can be used to make these filter dynamic.',
       '#default_value' => $settings['filter_qstring'],
-    );
+    ];
 
     return $element;
   }
@@ -166,7 +168,7 @@ class local__quick_search_formatter extends TripalFieldFormatter {
     // We do this here so we can fill in the values of the fields
     // and so we don't increase time during the redirect.
     // Start our main paramter which will later be entered by the user.
-    $settings['qparams'] = array($settings['key'] => '[value]');
+    $settings['qparams'] = [$settings['key'] => '[value]'];
 
     // Then, if there are any additional query params, we will process them line-by-line.
     // @assumption: each additional query param is on it's own line.
@@ -178,14 +180,14 @@ class local__quick_search_formatter extends TripalFieldFormatter {
         $line = trim($line);
 
         // Check if there's a field token & if so, replace it.
-        $matches = array();
+        $matches = [];
         if (preg_match('/\[(\w+)\]/', $line, $matches)) {
           $key = '[' . $matches[1] . ']';
           $values = field_get_items($entity_type, $entity, $matches[1]);
           if ($values === FALSE) {
             tripal_report_error('trpfancy_fields', TRIPAL_WARNING,
               'Quick Search Field %name: %token not found, replaced with empty string.',
-              array('$name' => $this->instance['field_name'], '%token' => $key));
+              ['$name' => $this->instance['field_name'], '%token' => $key]);
           }
 
           foreach ($values as $v) {
@@ -195,7 +197,7 @@ class local__quick_search_formatter extends TripalFieldFormatter {
         }
 
         // Extract the key and value to add to the params list.
-        $matches = array();
+        $matches = [];
         if (preg_match('/^(\w+\[*\]*)=(\w+)$/', $line, $matches)) {
           $settings['qparams'][$matches[1]] = $matches[2];
         }
@@ -206,10 +208,10 @@ class local__quick_search_formatter extends TripalFieldFormatter {
     $form = drupal_get_form('local__quick_search_field_view_form', $settings);
 
     // Render it and pass it as the markup for this field.
-    $element[0] = array(
+    $element[0] = [
       '#type' => 'markup',
       '#markup' => drupal_render($form),
-    );
+    ];
 
     return $element;
   }
@@ -271,7 +273,7 @@ function local__quick_search_field_view_form($form, &$form_state) {
   // Retrieve the formatter settings from thr build info.
   $settings = $form_state['build_info']['args'][0];
 
-  $form['#attached']['css'][] = array(
+  $form['#attached']['css'][] = [
     'type' => 'inline',
     'data' => '
       .field-type-local--quick-search .help-text {
@@ -290,48 +292,47 @@ function local__quick_search_field_view_form($form, &$form_state) {
         width: 98%;
       }
     ',
-  );
+  ];
 
-  $form['path'] = array(
+  $form['path'] = [
     '#type' => 'hidden',
     '#value' => $settings['path'],
-  );
+  ];
 
-  $form['key'] = array(
+  $form['key'] = [
     '#type' => 'hidden',
     '#value' => $settings['key'],
-  );
+  ];
 
-  $form['qparams'] = array(
+  $form['qparams'] = [
     '#type' => 'hidden',
     '#value' => $settings['qparams'],
-  );
+  ];
 
-  $form['help_text'] = array(
-    '#type' => 'markup',
-    '#markup' => '<span class="help-text">' . $settings['help_text'] . '</span>',
-  );
+  $form['help_text'] = [
+    '#type' => 'inline_template',
+    '#template' => '<span class="help-text">' . $settings['help_text'] . '</span>',
+  ];
 
-  $form['search'] = array(
-    '#type' => 'markup',
+  $form['search'] = [
     '#prefix' => '<div class="quick-search-container">',
     '#suffix' => '</div>',
-  );
+  ];
 
-  $form['search']['value'] = array(
+  $form['search']['value'] = [
     '#type' => 'textfield',
     '#title' => 'Search Terms',
     '#title_display' => 'invisible',
-    '#attributes' => array(
+    '#attributes' => [
       'placeholder' => $settings['placeholder'],
-    ),
+    ],
     '#autocomplete_path' => $settings['autocomplete_path'],
-  );
+  ];
 
-  $form['search']['submit'] = array(
+  $form['search']['submit'] = [
     '#type' => 'submit',
     '#value' => $settings['button_text'],
-  );
+  ];
 
   return $form;
 }
@@ -353,8 +354,8 @@ function local__quick_search_field_view_form_submit($form, &$form_state) {
   $form_state['values']['qparams'][$form_state['values']['key']] = $form_state['values']['value'];
 
 
-  $form_state['redirect'] = array(
+  $form_state['redirect'] = [
     $form_state['values']['path'],
-    array( 'query' => $form_state['values']['qparams'] ),
-  );
+    ['query' => $form_state['values']['qparams']],
+  ];
 }

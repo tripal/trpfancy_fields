@@ -1,4 +1,6 @@
 <?php
+use Drupal\Core\Url;
+
 /**
  * @class
  * Purpose: Provide a quick browse on entity pages which submits/redirects to a full browse.
@@ -17,13 +19,13 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
   // The default label for this field.
   public static $default_label = 'Simple Quick Browse';
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__quick_browse');
+  public static $field_types = ['local__quick_browse'];
   // The list of default settings for this formatter.
-  public static $default_settings = array(
+  public static $default_settings = [
     'button_text' => 'Browse',
     'help_text' => 'Choose what you would like to browse from the drop-down. Clicking one of the resulting links will take you to a listing for further browsing.',
-    'categories' => array(),
-  );
+    'categories' => [],
+  ];
 
   /**
    * Provides the field's setting form.
@@ -71,12 +73,12 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     // Ensure each browser type has a config form in the categories.
     foreach ($types as $k => $v) {
       if (!isset($settings['categories'][$k])) {
-        $settings['categories'][$k] = array(
+        $settings['categories'][$k] = [
           'type' => $v,
           'path' => NULL,
           'key' => NULL,
           'filter_qstring' => NULL,
-        );
+        ];
       }
       else {
         $settings['categories'][$k]['type'] = $v;
@@ -84,70 +86,70 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     }
 
     // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
-    $element['msg'] = array(
-      '#type' => 'markup',
-      '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
-    );
+    $element['msg'] = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
+    ];
 
-    $element['categories'] = array(
-      '#type' => 'fieldset',
+    $element['categories'] = [
+      '#type' => 'details',
       '#title' => 'Browser Types',
       '#description' => 'This field has a "Browse by [drop-down]" where the values in the
         drop-down will be the "Browser Types" you configure here. There will be a dedicated
         list of browse options for each "Browser Type" that will redirect the user to a
         partially filtered search. For Example, where "Browser Type" is "Type" on an
         organism page, the options might include "Gene","mRNA","Genetic Marker", "variant", etc.',
-    );
+    ];
 
     foreach ($settings['categories'] as $category => $category_settings) {
-      $element['categories'][$category] = array(
+      $element['categories'][$category] = [
         '#type' => 'fieldset',
         '#title' => $category_settings['type'],
-      );
+      ];
 
-      $element['categories'][$category]['type'] = array(
+      $element['categories'][$category]['type'] = [
         '#type' => 'hidden',
         '#value' => $category_settings['type'],
-      );
+      ];
 
-      $element['categories'][$category]['path'] = array(
+      $element['categories'][$category]['path'] = [
         '#type' => 'textfield',
         '#title' => 'Browse Path',
         '#required' => TRUE,
         '#description' => 'This is the relative path of the browse page you would like to redirect the user to.',
         '#default_value' => $category_settings['path'],
-      );
+      ];
 
-      $element['categories'][$category]['key'] = array(
+      $element['categories'][$category]['key'] = [
         '#type' => 'textfield',
         '#title' => 'Query Parameter Key',
         '#required' => TRUE,
         '#description' => 'This key is used in the query parameters to tell your full browse which filter to apply the value to.',
         '#default_value' => $category_settings['key'],
-      );
+      ];
 
-      $element['categories'][$category]['filter_qstring'] = array(
+      $element['categories'][$category]['filter_qstring'] = [
         '#type' => 'textarea',
         '#title' => 'Additional Filter Criteria',
         '#description' => 'Use this field to add additional filter criteria to the URL query string upon submimt. Each additional criteria should be indicated on a seperate line using the key=value format. Tokens of the format `[field machine name]` can be used to make these filter dynamic.',
         '#default_value' => $category_settings['filter_qstring'],
-      );
+      ];
     }
 
-    $element['button_text'] = array(
+    $element['button_text'] = [
       '#type' => 'textfield',
       '#title' => 'Button Text',
       '#required' => TRUE,
       '#description' => 'The text on the browse button.',
       '#default_value' => $settings['button_text'],
-    );
+    ];
 
-    $element['help_text'] = array(
+    $element['help_text'] = [
       '#type' => 'textarea',
       '#title' => 'Help Text',
       '#description' => 'Guidance to your users for how to use the quick browse form.',
       '#default_value' => $settings['help_text'],
-    );
+    ];
 
     return $element;
   }
@@ -186,7 +188,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
         'trpfancy_fields',
         TRIPAL_ERROR,
         'No Browser types available. Please configure the field, :field_name, <a href="@url">here</a>.',
-        array(':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/display'))
+        [':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/display')]
       );
       return $element;
     }
@@ -201,7 +203,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
           'trpfancy_fields',
           TRIPAL_ERROR,
           'No options available for :field_label (:field_name). Please add options by editing the field <a href="@url">here</a>.',
-          array(':field_label' => $this->instance['label'], ':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/fields/'.$this->instance['field_name']))
+          [':field_label' => $this->instance['label'], ':field_name' => $this->instance['field_name'], '@url' => url('/admin/structure/bio_data/manage/'.$this->instance['bundle'].'/fields/'.$this->instance['field_name'])]
         );
       }
       // However, if there are options per entity then it may just be that this particular
@@ -211,7 +213,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
           'trpfancy_fields',
           TRIPAL_NOTICE,
           'No options available for :entity_title. Please add options by editing the entity, <a href="@url">here</a>, and filling out :field_label in the form.',
-          array(':entity_title' => $entity->title, ':field_label' => $this->instance['label'], '@url' => url('/bio_data/'.$entity->id.'/edit'))
+          [':entity_title' => $entity->title, ':field_label' => $this->instance['label'], '@url' => url('/bio_data/'.$entity->id.'/edit')]
         );
       }
       return $element;
@@ -220,7 +222,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     // Save the options to be passed through to the form later.
     $options = $items[0]['value'];
 
-    $browser_types = array();
+    $browser_types = [];
     foreach ($settings['categories'] as $type => $info) {
 
       // If there are no options for the current browser type then don't add it.
@@ -234,7 +236,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
       // We do this here so we can fill in the values of the fields
       // and so we don't increase time during the redirect.
       // Start our main paramter which will later be entered by the user.
-      $settings['categories'][$type]['qparams'] = array($info['key'] => '[value]');
+      $settings['categories'][$type]['qparams'] = [$info['key'] => '[value]'];
 
       // Then, if there are any additional query params, we will process them line-by-line.
       // @assumption: each additional query param is on it's own line.
@@ -246,14 +248,14 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
           $line = trim($line);
 
           // Check if there's a field token & if so, replace it.
-          $matches = array();
+          $matches = [];
           if (preg_match('/\[(\w+)\]/', $line, $matches)) {
             $key = '[' . $matches[1] . ']';
             $values = field_get_items($entity_type, $entity, $matches[1]);
             if ($values === FALSE) {
               tripal_report_error('trpfancy_fields', TRIPAL_WARNING,
                 'Quick Browse Field %name: %token not found, replaced with empty string.',
-                array('$name' => $this->instance['field_name'], '%token' => $key));
+                ['$name' => $this->instance['field_name'], '%token' => $key]);
             }
 
             foreach ($values as $v) {
@@ -263,7 +265,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
           }
 
           // Extract the key and value to add to the params list.
-          $matches = array();
+          $matches = [];
           if (preg_match('/^(\w+\[*\]*)=(\w+)$/', $line, $matches)) {
             $settings['categories'][$type]['qparams'][$matches[1]] = $matches[2];
           }
@@ -274,18 +276,18 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
     // Retrieve my form (implemented below this class).
     $form = drupal_get_form(
       'local__quick_browse_field_view_form',
-      array(
+      [
         'settings' => $settings,
         'options' => $options,
         'browser_types' => $browser_types,
-      )
+      ]
     );
 
     // Render it and pass it as the markup for this field.
-    $element[0] = array(
+    $element[0] = [
       '#type' => 'markup',
       '#markup' => drupal_render($form),
-    );
+    ];
 
     return $element;
   }
@@ -321,7 +323,7 @@ class local__quick_browse_formatter extends TripalFieldFormatter {
 
     $settings = $this->instance['display'][$view_mode]['settings'];
 
-    $types = array();
+    $types = [];
     foreach ($settings['categories'] as $category => $values) {
       $types[] = $values['type'];
     }
@@ -350,7 +352,7 @@ function local__quick_browse_field_view_form($form, &$form_state) {
   $options = $form_state['build_info']['args'][0]['options'];
   $browser_types = $form_state['build_info']['args'][0]['browser_types'];
 
-  $form['#attached']['css'][] = array(
+  $form['#attached']['css'][] = [
     'type' => 'inline',
     'data' => '
       #local-quick-browse-field-view-form {
@@ -379,76 +381,80 @@ function local__quick_browse_field_view_form($form, &$form_state) {
         width: 300px;
       }
     ',
-  );
+  ];
 
   // Choose a default browser type ;-p.
   reset($browser_types);
   $default_type = key($browser_types);
 
-  $form['type'] = array(
+  $form['type'] = [
     '#type' => 'select',
     '#title' => 'Browse',
     '#options' => $browser_types,
     '#empty_option' => ' - Select -',
     '#description' => $settings['help_text'],
     '#default_value' => $default_type,
-  );
+  ];
 
-  $form['path'] = array(
+  $form['path'] = [
     '#type' => 'hidden',
     '#value' => $settings['categories'][$current_type]['path'],
-  );
+  ];
 
-  $form['key'] = array(
+  $form['key'] = [
     '#type' => 'hidden',
     '#value' => $settings['categories'][$current_type]['key'],
-  );
+  ];
 
-  $form['qparams'] = array(
+  $form['qparams'] = [
     '#type' => 'hidden',
     '#value' => $settings['categories'][$current_type]['qparams'],
-  );
+  ];
 
   foreach (array_keys($browser_types) as $current_type) {
-    $list = array();
+    $list = [];
     foreach($options[$current_type] as $k => $v) {
       $params = $settings['categories'][$current_type]['qparams'];
       $params[ $settings['categories'][$current_type]['key'] ] = $k;
-      $list[] = l(
-        $v,
-        $settings['categories'][$current_type]['path'],
-        array( 'query' => $params )
-      );
+
+      $link = \Drupal::l(t($v), Url::fromUri($settings['categories'][$current_type]['path'], ['query' => $params]));
+      $list[] = $link;
     }
 
-    $form['options'][$current_type] = array(
-      '#type' => 'markup',
+    $form['options'][$current_type] = [
       '#theme' => 'item_list',
+      '#list_type' => 'ul',
       '#items' => $list,
       '#prefix' => '<div id="browse-options-'.str_replace(' ' ,'-',$current_type).'" class="browser-options" style="display:none;">',
       '#suffix' => '</div>',
-    );
+    ];
   }
 
   // Finally add javascript that will show/hide based on select box.
   // Note: We used js here rather then ajax because drupal ajax had trouble finding the form.
-  drupal_add_js('
-    Drupal.behaviors.trpfancyFieldsQuickBrowse = {
-      attach: function (context, settings) {
+  $form['#attached']['html_head'][] = [
+    [
+      '#tag' => 'script',
+      '#attributes' => ['type' => 'text/javascript'],
+      '#value' => '
+        Drupal.behaviors.trpfancyFieldsQuickBrowse = {
+          attach: function (context, settings) {
 
-        // If the selectbox is set on page load, we should show the appropriate options.
-        var selected = document.getElementById("edit-type").value;
-        jQuery("#browse-options-"+selected).show();
+            // If the selectbox is set on page load, we should show the appropriate options.
+            var selected = document.getElementById("edit-type").value;
+            jQuery("#browse-options-"+selected).show();
 
-        // Ensure that when the selectbox is changed, the options change.
-        document.getElementById("edit-type").onchange = function (e) {
-          // Hide all browser options
-          jQuery(".browser-options").hide();
-          // Show the browser options by removing display:none.
-          jQuery("#browse-options-"+this.value).show();
-        };
-    }};
-    ', 'inline');
+            // Ensure that when the selectbox is changed, the options change.
+            document.getElementById("edit-type").onchange = function (e) {
+              // Hide all browser options
+              jQuery(".browser-options").hide();
+              // Show the browser options by removing display:none.
+              jQuery("#browse-options-"+this.value).show();
+            };
+        }};
+      '
+    ],
+  ];
 
   return $form;
 }
@@ -465,4 +471,3 @@ function local__quick_browse_field_view_form($form, &$form_state) {
  *   Completed $form above.
  */
 function local__quick_browse_field_view_form_submit($form, &$form_state) { }
-

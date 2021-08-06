@@ -11,7 +11,7 @@ class local__quick_search_widget extends TripalFieldWidget {
   public static $default_label = 'No Edits';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__quick_search');
+  public static $field_types = ['local__quick_search'];
 
   /**
    * Provides the form for editing of this field.

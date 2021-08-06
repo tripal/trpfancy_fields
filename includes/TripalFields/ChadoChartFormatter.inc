@@ -16,16 +16,16 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
   public static $default_label = 'Chado Chart';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array();
+  public static $field_types = [];
 
   // The list of default settings for this formatter.
   // Due to the different charts available and the dependance upon the data,
   // it is too difficult to make a good default for the title and legend.
   // As such I am making a horrible one in the hopes of making admin change it ;-p.
-  public static $default_settings = array(
+  public static $default_settings = [
     'title' => 'Fancy Chart summarizing Stuff',
     'legend' => 'This should describe the chart including the data that goes into it and how to interpret that data. Furthermore, it is always a good idea to highlight how users can interact with this chart.',
-  );
+  ];
 
   /**
    * Provides the field's setting form.
@@ -60,7 +60,7 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
    *   A Drupal Form array containing the settings form for this field.
    */
   public function settingsForm($view_mode, $form, &$form_state) {
-    $element = array();
+    $element = [];
 
     // Retrieve the current settings.
     $settings = $this->instance['display'][$view_mode]['settings'];
@@ -68,27 +68,27 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
     if (!isset($settings['legend'])) { $settings['legend'] = self::$default_settings['legend']; }
 
     // This has caught me a couple of times so I'm going to remind both myself and others ;-p.
-    $element['msg'] = array(
+    $element['msg'] = [
       '#type' => 'markup',
       '#markup' => '<div class="messages warning">Settings are only saved after you click "Update" within this box <br />AND "Save" at the bottom of the page!</div>',
-    );
+    ];
 
     // Add in all the general settings
     // which can be passed to TripalD3.drawFigure().
     //-------------------------------------------
-    $element['title'] = array(
+    $element['title'] = [
       '#type' => 'textfield',
       '#title' => 'Figure Title',
       '#default_value' => $settings['title'],
       '#description' => 'A breif title for the figure.',
-    );
+    ];
 
-    $element['legend'] = array(
+    $element['legend'] = [
       '#type' => 'textarea',
       '#title' => 'Figure Legend',
       '#default_value' => $settings['legend'],
       '#description' => 'Should describe the figure to the user.',
-    );
+    ];
 
     return $element;
   }
@@ -137,7 +137,7 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
     // 2. Transform the data in $items to the format required by your chart
     //    and make it available to the chart via drupal_add_js as "settings".
     if (!empty($items[0]['value'])) {
-      $data = array();
+      $data = [];
       foreach ($items as $key => $value) {
         // Add it to the data array.
       }
@@ -221,5 +221,4 @@ class ChadoChartFormatter extends ChadoFieldFormatter {
     $settings = $this->instance['display'][$view_mode]['settings'];
     return '<strong>Title:</strong> ' . $settings['title'];
   }
-
 }

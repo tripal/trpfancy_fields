@@ -1,0 +1,17 @@
+/*
+ * @file
+ * Style Tripal Fancy Fields Configuration.
+ */
+ 
+ #tripal-fancyfields-box-id {
+   border: 1px solid #CCCCCC; 
+   display: inline-block;
+   font-family: courier, serif; 
+   font-size: 2em; 
+   margin: 5px 0 20px 0; 
+   padding: 10px; 
+ }
+
+   #tripal-fancyfields-box-id span {
+     color: #666666; 
+   }

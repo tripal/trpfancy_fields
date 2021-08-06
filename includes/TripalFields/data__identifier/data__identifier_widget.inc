@@ -1,4 +1,5 @@
 <?php
+use Drupal\Core\Url;
 
 /**
  * @class
@@ -14,7 +15,7 @@ class data__identifier_widget extends ChadoFieldWidget {
   public static $default_label = 'Autocomplete Uniquename';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('text');
+  public static $field_types = ['text'];
 
   /**
    * Provides the form for editing of this field.
@@ -85,12 +86,14 @@ class data__identifier_widget extends ChadoFieldWidget {
 
       // When interface to set prefix:
       // Notice for admin where they can alter the prefix use to formulate uniquename.
-      // @see hook_menu().
-      $link = l('Update Prefix', 'admin/tripal/extension/trpfancy_fields/prefix');
-      tripal_set_message('Administrators, you can set prefix used in uniquename field in ' . $link . '.', TRIPAL_INFO, array('return_html' => FALSE));
+      // @see routing.yml.
+      $link = \Drupal::l(t('Upfate Prefix'), Url::fromRoute('tripal_fancyfields.configure_data_id'));
+      tripal_set_message('Administrators, you can set prefix used in uniquename field in ' . $link . '.', TRIPAL_INFO, ['return_html' => FALSE]);
 
       // Pull system variable for configured prefix.
-      $prefix = variable_get('trpfancy_field_identifier_prefix');
+      $prefix = \Drupal::config('trpfancy_fields.settings')
+        ->get('tripal_fancyfields_identifier_config.prefix');
+
 
       // Dertermine if process is Create or Update. To test: check if chado_record_id
       // were set to an id number.
@@ -101,10 +104,10 @@ class data__identifier_widget extends ChadoFieldWidget {
         $desciption = '';
 
         // Feed to this field the uniquename for this stock.
-        $widget['value'] = array(
+        $widget['value'] = [
           '#type' => 'value',
           '#value' => $unique_name,
-        );
+        ];
       }
       else {
         // Create.
@@ -115,22 +118,22 @@ class data__identifier_widget extends ChadoFieldWidget {
 
           // Use this to flag process that user is creating a new record
           // and quick reference to the field.
-          $form['trpfancy_fields_field_name'] = array(
+          $form['trpfancy_fields_field_name'] = [
             '#type' => 'value',
             '#value' => $field_name,
-          );
+          ];
 
-          $widget['table'] = array(
+          $widget['table'] = [
             '#type' => 'value',
             '#value' => $field_table,
-          );
+          ];
 
           $id = uniqid();
           // What actually gets saved.
-          $widget['value'] = array(
+          $widget['value'] = [
             '#type' => 'value',
             '#value' => $id,
-          );
+          ];
         }
       }
 
@@ -139,18 +142,18 @@ class data__identifier_widget extends ChadoFieldWidget {
       // information. As such, simply save it again.
 
       // What user sees.
-      $widget[$linker_field] = array(
+      $widget[$linker_field] = [
         '#type'   => 'textfield',
         '#title'   => 'Uniquename',
         '#value'    => $unique_name,
         '#disabled'  => TRUE,
         '#description' => $desciption,
-      );
+      ];
     }
     else {
       // Text field but not identifier.
-      drupal_set_message('This option is available only to Identifier (text field). Please restore field <em>' . $element['#title'] . '</em> to Text type.', 'error');
-      tripal_set_message('Administrators, please ensure that you are adding this autocomplete uniquename field only to Identifier field.', TRIPAL_INFO, array('return_html' => FALSE));
+      \Drupal::messenger()->addError(t('This option is available only to Identifier (text field). Please restore field <em>' . $element['#title'] . '</em> to Text type.'));
+      tripal_set_message('Administrators, please ensure that you are adding this autocomplete uniquename field only to Identifier field.', TRIPAL_INFO, ['return_html' => FALSE]);
     }
   }
 
@@ -213,7 +216,8 @@ class data__identifier_widget extends ChadoFieldWidget {
 
       $tmp_uniquename = $form_state['values'][$field_name]['und'][0]['value'];
 
-      $prefix = variable_get('trpfancy_field_identifier_prefix');
+      $prefix = \Drupal::config('trpfancy_fields.settings')
+        ->get('tripal_fancyfields_identifier_config.prefix');
       $form_state['values'][$field_name][$langcode][$delta][$linker_field] = $prefix . $tmp_uniquename;
     }
 
@@ -235,15 +239,16 @@ class data__identifier_widget extends ChadoFieldWidget {
       $data = $arr['und'][0];
 
       $tmp_uniquename = $data['value'];
-      $prefix = variable_get('trpfancy_field_identifier_prefix');
+      $prefix = \Drupal::config('trpfancy_fields.settings')
+        ->get('tripal_fancyfields_identifier_config.prefix');
 
       // Find the primary key of the table this uniquename is attached to.
       $pk = chado_query("SELECT column_name FROM information_schema.COLUMNS WHERE TABLE_NAME = :table",
-        array(':table' => $data['table']))
+        [':table' => $data['table']])
         ->fetchField();
 
       $sql = sprintf("SELECT %s FROM {%s} WHERE uniquename = :uniquename LIMIT 1", $pk, $data['table']);
-      $id = chado_query($sql, array(':uniquename' => $prefix . $tmp_uniquename))
+      $id = chado_query($sql, [':uniquename' => $prefix . $tmp_uniquename])
         ->fetchField();
 
       if ($id) {
@@ -251,8 +256,8 @@ class data__identifier_widget extends ChadoFieldWidget {
         $new_uniquename = $prefix . $id;
 
         chado_update_record($data['table'],
-          array('uniquename' => $prefix . $tmp_uniquename),
-          array('uniquename' => $new_uniquename)
+          ['uniquename' => $prefix . $tmp_uniquename],
+          ['uniquename' => $new_uniquename]
         );
       }
     }

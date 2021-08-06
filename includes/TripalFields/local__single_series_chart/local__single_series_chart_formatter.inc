@@ -16,13 +16,13 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
   public static $default_label = 'Single-Series Table';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__single_series_chart');
+  public static $field_types = ['local__single_series_chart'];
 
   // The list of default settings for this formatter.
   // Due to the different charts available and the dependance upon the data,
   // it is too difficult to make a good default for the title and legend.
   // As such I am making a horrible one in the hopes of making admin change it ;-p.
-  public static $default_settings = array(
+  public static $default_settings = [
     'title' => 'Fancy Chart summarizing Stuff',
     'legend' => 'This should describe the chart including the data that goes into it and how to interpret that data. Furthermore, it is always a good idea to highlight how users can interact with this chart.',
     // Supports either 'top' or 'bottom'. This refers to the legend only,
@@ -30,7 +30,7 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
     'legend_pos' => 'top',
     // Supports either 'data' or 'info'.
     'table_type' => 'data',
-  );
+  ];
 
   /**
    * Provides the field's setting form.
@@ -74,21 +74,21 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
     if (!isset($settings['legend_pos'])) { $settings['legend_pos'] = self::$default_settings['legend_pos']; }
     if (!isset($settings['table_type'])) { $settings['table_type'] = self::$default_settings['table_type']; }
 
-    $element['legend_pos'] = array(
+    $element['legend_pos'] = [
       '#type' => 'radios',
       '#title' => 'Legend Postion',
       '#description' => 'The position of the "Figure Legend" text filled out above in respect to the table itself.',
-      '#options' => array('top' => 'top', 'bottom' => 'bottom'),
+      '#options' => ['top' => 'top', 'bottom' => 'bottom'],
       '#default_value' => $settings['legend_pos'],
-    );
+    ];
 
-    $element['table_type'] = array(
+    $element['table_type'] = [
       '#type' => 'radios',
       '#title' => 'Table Type',
       '#description' => 'The type of table to generate where <strong>data</strong> refers to the typical data table with header on top and <strong>info</strong> refers to the typical Tripal info tables where the header is down the side and consists of your category labels.',
-      '#options' => array('data' => 'data', 'info' => 'info'),
+      '#options' => ['data' => 'data', 'info' => 'info'],
       '#default_value' => $settings['table_type'],
-    );
+    ];
 
     return $element;
   }
@@ -133,8 +133,43 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
 
     if (isset($items[0]) && !empty($items[0]['value'])) {
 
-      // Load the Tripal D3 API
-      tripald3_load_libraries();
+      // Load the Tripal D3 Libraries.      
+      $element['#attached']['library'][] = 'tripald3/D3';
+      $element['#attached']['library'][] = 'tripald3/D3';
+      
+      // CORE
+      $element['#attached']['library'][] = 'tripald3/D3';
+      $element['#attached']['library'][] = 'tripald3/tripalD3';
+      
+      // CHARTS
+      // Pie
+      $element['#attached']['library'][] = 'tripald3/lib-pie';
+      $element['#attached']['library'][] = 'tripald3/lib-bar';
+      'tripald3/lib-pedigree',
+      
+      // CREATE
+      $element['#attached']['library'][] = 'tripald3/create-multidonut';
+      $element['#attached']['library'][] = 'tripald3/create-pie';
+      $element['#attached']['library'][] = 'tripald3/create-multiseriesdonut';
+      $element['#attached']['library'][] = 'tripald3/create-bar';
+      $element['#attached']['library'][] = 'tripald3/create-pedigree';
+
+      // STYLE
+      $element['#attached']['library'][] = 'tripald3/style-tripald3';
+
+      // SETTINGS 
+      // Color scheme configuration.
+      $default_scheme = \Drupal::service('tripald3.TripalD3ColorScheme')
+        ->registerColorScheme();
+      $to_Drupalsettings['tripalD3']['vars']['colorScheme'] = $default_scheme; 
+
+      // Auto resize configuration.        
+      $default_resize = $this->config('tripald3.settings')
+        ->get('tripald3_autoResize');
+      $to_Drupalsettings['tripalD3']['vars']['autoResize']  = $default_resize;
+      
+      $element['#attached']['drupalSettings'] = $to_Drupalsettings;
+
 
       // Defaults based on table type.
       //  -- Info.
@@ -143,12 +178,11 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
         // our data includes the header (first column).
         $header = NULL;
         $column_is_header = TRUE;
-
-
       }
+
       // -- Data (default).
       else {
-        $header = array('label' => 'Category', 'count' => 'Amount');
+        $header = ['label' => 'Category', 'count' => 'Amount'];
         $column_is_header = FALSE;
       }
 
@@ -166,15 +200,15 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
       }
 
       // Format the data.
-      $rows = array();
+      $rows = [];
       foreach ($items as $key => $value) {
         foreach ($value['value']['hydra:member'] as $part) {
 
           // Compile the row.
-          $row = array(
-            'label' => array('data' => $part['rdfs:label']),
+          $row = [
+            'label' => ['data' => $part['rdfs:label']],
             'count' => number_format($part['local:count']),
-          );
+          ];
 
           // Indicate if the first column should be a header.
           if ($column_is_header) {
@@ -187,21 +221,20 @@ class local__single_series_chart_formatter extends ChadoChartFormatter {
       }
 
       // Finally, add the markup.
-      $element[0] = array(
-        '#type' => 'markup',
-        '#theme' => 'table',
+      $element[0] = [
+        '#type' => 'table',
+        '#title' => $caption,
         '#header' => $header,
         '#rows' => $rows,
-        '#attributes' => array(
-          'class' => array('tripald3-chart', $settings['table_type']),
-        ),
-        '#caption' => $caption,
-      );
+        '#empty' => t('0 Items in this table'),
+        '#attributes' => [
+          'class' => ['tripald3-chart', $settings['table_type']],
+        ]
+      ];
 
       if ($footer) {
         $element[0]['#suffix'] = '<div class="trpfancy-table-footer">'.$footer.'</div>';
       }
-
     }
   }
 }

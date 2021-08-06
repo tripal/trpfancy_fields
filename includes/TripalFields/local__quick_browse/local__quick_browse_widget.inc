@@ -16,7 +16,7 @@ class local__quick_browse_widget extends TripalFieldWidget {
   public static $default_label = 'Option Editor';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__quick_browse');
+  public static $field_types = ['local__quick_browse'];
 
   /**
    * Provides the form for editing of this field.
@@ -76,9 +76,8 @@ class local__quick_browse_widget extends TripalFieldWidget {
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
 
-
     /**
-      @todo: figure out how to save this!
+      @TODO: figure out how to save this!
       I think I need to write a storage backend but there's currently no
       documentation on how to do this. The validate method below gets called on the entity
       edit form but the submit doesn't get called on either the entity or field edit form.
@@ -103,57 +102,61 @@ class local__quick_browse_widget extends TripalFieldWidget {
 
     // If there are no types yet... tell the admin what to do.
     if (empty($types)) {
-      $widget['msg'] = array(
-        '#type' => 'markup',
-        '#markup' => '<div class="messages warning">'
-          .'You first need to set the <strong>Browser Types</strong> above, before you can set the default options for them.<br />'
-          .'<strong>NOTE: You need to save the browser types first and then re-edit this field to set the options.</strong>'
-          .'</div>'
-      );
+      $widget['msg'] = [
+        '#type' => 'inline_template',
+        '#template' => '<div class="messages warning">'
+          . 'You first need to set the <strong>Browser Types</strong> above, before you can set the default options for them.<br />'
+          . '<strong>NOTE: You need to save the browser types first and then re-edit this field to set the options.</strong>'
+          . '</div>'
+      ];
     }
     else {
 
-      $widget['value'] = array(
-        '#type' => 'fieldset',
+      $widget['value'] = [
+        '#type' => 'details',
         '#title' => '<em>'.$this->instance['label'].'</em> Options',
-        '#tree' => TRUE,
+        '#open' => TRUE,
         '#description' => 'Each section below corresponds to an option in the <em>'.$this->instance['label'].'</em> Browse drop-down. The options you provide will be used to create links for the user to browse.',
-      );
+      ];
 
       if (!$on_entity_edit_form) {
-        $widget['value']['msg'] = array(
-          '#type' => 'markup',
-          '#markup' => '<div class="messages status">'
-            .'The options you set below will become the default for all entities of this type. If you have selected "Dependant on the page shown" as the "option Source" above, then these options can be changed on the edit page.'
-            .'</div>',
-          '#weight' => -100,
-        );
+        $widget['value']['msg'] = [
+          '#type' => 'inline_template',
+          '#template' => '
+            <div role="contentinfo" aria-label="status message" class="messages messages--status">
+              <div role="alert">
+                <h2 class="visually-hidden">status message</h2>
+                The options you set below will become the default for all entities of this type. If you have selected "Dependant on the page shown" as the "option Source" above, then these options can be changed on the edit page.
+              </div>
+            </div>'
+        ];
       }
 
       foreach ($types as $machine_name => $label) {
-        $widget['value'][$machine_name] = array(
+        $widget['value'][$machine_name] = [
           '#type' => 'textarea',
           '#title' => '<em>' . $label . '</em> Options',
           '#description' => 'Enter the list of options you want to appear when the user selects "Browse <em>'.$label.'</em>". <strong>Each Option should be indicated on a seperate line using the key=value format</strong>
             where the key is the value saved by the module and the value is the option shown to the user.',
-        );
+        ];
 
         if (isset($current_values[$machine_name])) {
           $default_value = '';
+          
           foreach ($current_values[$machine_name] as $k => $v) {
             $default_value .= "$k=$v\n";
           }
-           $widget['value'][$machine_name]['#value'] = $default_value;
+
+          $widget['value'][$machine_name]['#value'] = $default_value;
         }
       }
 
-      $widget['value']['note'] = array(
-        '#type' => 'markup',
-        '#markup' => '<strong>NOTE: It may be more efficient or perferrable to set the options via an SQL query
+      $widget['value']['note'] = [
+        '#type' => 'inline_template',
+        '#template' => '<strong>NOTE: It may be more efficient or perferrable to set the options via an SQL query
           (advanced users only). For options global to the field, insert into the <em>trpfancy_browse_options</em> table where the <em>instance_id='.$this->instance['id'].'</em>.
           For options specific to each entity, insert into the <em>trpfancy_browse_options_per_entity</em> table where the <em>instance_id='.$this->instance['id'].'</em>.</strong>',
-        '#weight' => 100,
-      );
+      ];
     }
     */
   }

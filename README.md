@@ -1,11 +1,11 @@
 # Tripal Fancy Fields
 
-This module provides additional fields for use with Tripal 3. The current version provides a single-series chart field that can be displayed as a pie, donut, or bar chart, as well as, a simple table. Future versions will provide support for multi-series datasets, pedigree's, hierarchy/relationship diagrams, and quick searches. These fields are highly configurable and use your existing materialized views as the datasource which allows them to be fast and flexible.
+This module provides additional fields for use with Tripal 4. The current version provides a single-series chart field that can be displayed as a pie, donut, or bar chart, as well as, a simple table. Future versions will provide support for multi-series datasets, pedigree's, hierarchy/relationship diagrams, and quick searches. These fields are highly configurable and use your existing materialized views as the datasource which allows them to be fast and flexible.
 
 ## Installation
 This module is installed the same as any Drupal module. 
 ### Dependencies
-1. [Tripal 3.x](https://github.com/tripal/tripal)
+1. [Tripal 4.x](https://github.com/tripal/tripal)
 2. [Tripal D3](https://github.com/tripal/tripald3)
 
 ## How To Use this Module
@@ -18,7 +18,7 @@ If you simply want to use the existing charts, you can add these fields through 
 
 ### Extend the Base Classes
 If you would like even more control over the field then is provided through the UI, you can extend the ChadoChart base classes in your own custom module.
-1. Create a custom module. See the [Drupal Documentation](https://www.drupal.org/docs/7/creating-custom-modules) for how to do this.
+1. Create a custom module. See the [Drupal Documentation](https://www.drupal.org/docs/creating-custom-modules) for how to do this.
 2. Create your child class extending the base class of your choice in `[your module]/includes/TripalFields/[field name]/[field name].inc`
 3. Set the various settings under `EDITABLE STATIC CONSTANTS`.
 4. Implement hook_bundle_fields_info() and hook_bundle_instances_info() to attach your field to a Tripal Content Type or add it through the UI just like you would a regular Tripal Fancy Field.
